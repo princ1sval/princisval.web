@@ -44,9 +44,10 @@ select {
 }
 
 /* Listas com role="list" perdem as bolinhas/números padrão.
-   O role mantém a lista reconhecida por leitores de tela no Safari. */
-ul[role="list"],
-ol[role="list"] {
+   O role mantém a lista reconhecida por leitores de tela no Safari.
+   :where() deixa esta regra com força (especificidade) zero, então
+   qualquer classe do components.css ou sections.css ganha dela. */
+:where(ul[role="list"], ol[role="list"]) {
   list-style: none;
   padding: 0;
 }

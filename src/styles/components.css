@@ -1,0 +1,350 @@
+/* =========================================================
+   Componentes: peças que se repetem pela página
+   Cada bloco cuida da aparência de uma peça (cor, borda,
+   tamanho). Onde ela fica na página é com o sections.css.
+   ========================================================= */
+
+/* ---------- Botão principal ---------- */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-2);
+  min-height: 52px;
+  padding: 0 var(--espaco-5);
+  border: 1px solid var(--cor-lima);
+  border-radius: var(--raio-botao);
+  background-color: var(--cor-lima);
+  color: var(--cor-carbono);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-base);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.botao:hover {
+  border-color: var(--cor-gelo);
+  background-color: var(--cor-gelo);
+  color: var(--cor-carbono);
+}
+
+/* Variação: contorno, sem fundo ("Ver projetos") */
+.botao--secundario {
+  border-color: var(--cor-borda);
+  background-color: transparent;
+  color: var(--cor-gelo);
+  font-weight: 500;
+}
+
+.botao--secundario:hover {
+  border-color: var(--cor-lima);
+  background-color: transparent;
+  color: var(--cor-lima);
+}
+
+/* ---------- Botão redondo (setas do portfólio) ---------- */
+
+.botao-redondo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--alvo-toque);
+  height: var(--alvo-toque);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background-color: transparent;
+  color: var(--cor-gelo);
+  font-size: var(--texto-medio);
+  cursor: pointer;
+}
+
+.botao-redondo:hover {
+  border-color: var(--cor-lima);
+  color: var(--cor-lima);
+}
+
+/* ---------- Pílula "● agenda aberta" ---------- */
+
+.pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: var(--espaco-1) var(--espaco-3);
+  border: 1px solid var(--cor-lima);
+  border-radius: var(--raio-pilula);
+  color: var(--cor-lima);
+}
+
+/* ---------- Rótulo "// comentário" ---------- */
+
+.rotulo {
+  color: var(--cor-cinza);
+}
+
+/* ---------- Logo <P/> princípio.web ---------- */
+
+.logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--espaco-3);
+  padding-block: var(--espaco-2);
+  color: var(--cor-gelo);
+  text-decoration: none;
+}
+
+.logo:hover {
+  color: var(--cor-gelo);
+}
+
+.logo__simbolo {
+  font-family: var(--fonte-mono);
+  font-size: 1.375rem;
+  font-weight: 500;
+}
+
+.logo__seta {
+  color: var(--cor-cinza);
+}
+
+/* A barra lima: inline-block permite usar transform num pedaço de texto */
+.logo__barra {
+  display: inline-block;
+  color: var(--cor-lima);
+  transform: scaleY(1.18) skewX(-8deg); /* um pouco mais alta e mais inclinada */
+}
+
+.logo__nome {
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-medio);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- Card (para quem é) ---------- */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  padding: clamp(var(--espaco-5), 3vw, var(--espaco-6));
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+}
+
+.card__numero {
+  color: var(--cor-lima);
+}
+
+.card p {
+  color: var(--cor-cinza);
+}
+
+/* ---------- Moldura de print (profundidade) ---------- */
+
+.print {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-print);
+  background-color: var(--cor-superficie);
+}
+
+.print--principal {
+  border-color: var(--cor-lima);
+  box-shadow: var(--sombra-print);
+}
+
+/* Barrinha de navegador no topo da moldura */
+.print__barra {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  min-height: 30px;
+  padding: 0 var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+  color: var(--cor-cinza);
+}
+
+/* Os três pontinhos: um círculo de verdade + duas cópias
+   feitas com box-shadow, deslocadas 14 px e 28 px para a direita */
+.print__barra::before {
+  content: "";
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-right: 28px; /* reserva o espaço ocupado pelas duas cópias */
+  border-radius: 50%;
+  background-color: var(--cor-borda);
+  box-shadow:
+    14px 0 0 var(--cor-borda),
+    28px 0 0 var(--cor-borda);
+}
+
+.print__tela {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-3);
+  color: var(--cor-cinza);
+  text-align: center;
+}
+
+/* ---------- Projeto (cards do portfólio) ---------- */
+
+.projeto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.projeto__print {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 360px;
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-print);
+  background-color: var(--cor-superficie);
+  color: var(--cor-cinza);
+  text-align: center;
+}
+
+.projeto__info {
+  color: var(--cor-cinza);
+}
+
+/* No esboço o nome do projeto é texto em negrito, não um título grande */
+.projeto__nome {
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-base);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* ---------- Lista numerada (o que está incluso) ---------- */
+
+.lista-numerada li {
+  display: flex;
+  align-items: baseline; /* número e texto alinhados pela base das letras */
+  gap: var(--espaco-5);
+  padding-block: var(--espaco-5);
+  border-top: 1px solid var(--cor-borda);
+  font-size: var(--texto-medio);
+}
+
+.lista-numerada li:last-child {
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.lista-numerada__numero {
+  flex-shrink: 0;
+  min-width: 1.75rem;
+  color: var(--cor-lima);
+}
+
+/* ---------- Passo (como funciona) ---------- */
+
+.passo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  padding-top: var(--espaco-5);
+  border-top: 2px solid var(--cor-borda);
+}
+
+/* O primeiro passo marcado em lima, como no esboço */
+.passo:first-child {
+  border-top-color: var(--cor-lima);
+}
+
+.passo__numero {
+  color: var(--cor-lima);
+}
+
+.passo p {
+  color: var(--cor-cinza);
+}
+
+/* ---------- Acordeão (dúvidas) ---------- */
+
+.acordeao details {
+  border-top: 1px solid var(--cor-borda);
+}
+
+.acordeao details:last-child {
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.acordeao summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  min-height: var(--alvo-toque);
+  padding-block: var(--espaco-5);
+  font-size: var(--texto-medio);
+  font-weight: 600;
+  list-style: none; /* tira o triângulo padrão (Chrome e Firefox) */
+}
+
+/* Tira o triângulo padrão no Safari */
+.acordeao summary::-webkit-details-marker {
+  display: none;
+}
+
+/* + quando fechado, − quando aberto.
+   A segunda linha de content ("/ ''") esconde o sinal dos leitores
+   de tela; navegadores antigos ignoram e usam a primeira. */
+.acordeao summary::after {
+  content: "+";
+  content: "+" / "";
+  flex-shrink: 0;
+  color: var(--cor-lima);
+  font-family: var(--fonte-mono);
+  font-weight: 400;
+}
+
+.acordeao details[open] summary::after {
+  content: "−";
+  content: "−" / "";
+}
+
+/* Aberto: a pergunta encosta mais na resposta */
+.acordeao details[open] summary {
+  padding-bottom: var(--espaco-3);
+}
+
+.acordeao details p {
+  padding-bottom: var(--espaco-5);
+  color: var(--cor-cinza);
+}
+
+/* ---------- Botão flutuante do WhatsApp ---------- */
+
+/* position: fixed prende o botão na tela: ele fica no canto
+   mesmo quando a página rola */
+.whatsapp-flutuante {
+  position: fixed;
+  right: clamp(var(--espaco-4), 3vw, var(--espaco-6));
+  bottom: clamp(var(--espaco-4), 3vw, var(--espaco-6));
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--raio-pilula);
+  background-color: var(--cor-lima);
+  color: var(--cor-carbono); /* o ícone usa currentColor, então pega esta cor */
+  box-shadow: var(--sombra-flutuante);
+}
+
+.whatsapp-flutuante:hover {
+  background-color: var(--cor-gelo);
+  color: var(--cor-carbono);
+}

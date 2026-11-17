@@ -1,0 +1,410 @@
+/* =========================================================
+   Seções: o layout de cada parte da página
+   Mobile first: o estilo sem @media é o do celular.
+   As regras dentro de @media (min-width: ...) valem a partir
+   daquela largura:
+     48rem = 768 px (tablet)
+     64rem = 1024 px (desktop)
+   Variáveis CSS não funcionam dentro do @media, por isso
+   esses números ficam escritos direto.
+   ========================================================= */
+
+/* ---------- Estrutura comum ---------- */
+
+/* Conteúdo centralizado em até 1200 px (ver --recuo-lateral no tokens.css) */
+.topo,
+main > section,
+.rodape {
+  padding-inline: var(--recuo-lateral);
+}
+
+main > section {
+  padding-block: var(--espaco-8);
+  border-bottom: 1px solid var(--cor-grade);
+  /* Carbono liso cobre a grade do fundo */
+  background-color: var(--cor-carbono);
+}
+
+/* Estas deixam a grade aparecer, como no esboço */
+.abertura,
+.incluso,
+.contato {
+  background-color: transparent;
+}
+
+main > section:last-child {
+  border-bottom: 0;
+}
+
+/* Rótulo → título → conteúdo */
+.rotulo + h2 {
+  margin-top: var(--espaco-3);
+}
+
+.cards,
+.lista-numerada,
+.passos,
+.acordeao,
+.portfolio__lista {
+  margin-top: var(--espaco-7);
+}
+
+@media (min-width: 64rem) {
+  main > section {
+    padding-block: var(--espaco-9);
+  }
+}
+
+/* ---------- Topo (logo + navegação) ---------- */
+
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  padding-block: var(--espaco-3);
+}
+
+.nav__lista {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-6);
+}
+
+/* No celular, só o botão "Fale comigo" */
+.nav__texto {
+  display: none;
+}
+
+.nav__texto a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-toque);
+  color: var(--cor-cinza);
+  font-family: var(--fonte-mono);
+  font-size: var(--texto-mono);
+  text-decoration: none;
+}
+
+.nav__texto a:hover {
+  color: var(--cor-gelo);
+}
+
+/* Botão da navegação: mais compacto que os outros */
+.nav .botao {
+  min-height: var(--alvo-toque);
+  padding-inline: var(--espaco-4);
+  font-size: 0.875rem;
+}
+
+@media (min-width: 48rem) {
+  .topo {
+    padding-block: var(--espaco-5);
+  }
+
+  .nav__texto {
+    display: block;
+  }
+}
+
+/* ---------- 1. Abertura ---------- */
+
+.abertura {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* no celular, tudo alinhado à esquerda */
+  gap: var(--espaco-5);
+  padding-top: var(--espaco-8);
+}
+
+.abertura h1 {
+  max-width: 980px;
+}
+
+.abertura__subtitulo {
+  max-width: 35rem;
+  color: var(--cor-cinza);
+  font-size: var(--texto-grande);
+}
+
+/* No celular, botões um embaixo do outro, na largura toda */
+.abertura__botoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  width: 100%;
+  margin-top: var(--espaco-2);
+}
+
+@media (min-width: 48rem) {
+  .abertura {
+    align-items: center;
+    text-align: center;
+    padding-top: var(--espaco-10);
+  }
+
+  .abertura__botoes {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+/* ---------- 2. Profundidade ---------- */
+
+/* Palco das 3 molduras. As posições são em %, então a
+   composição inteira encolhe junto com a tela. */
+.profundidade {
+  position: relative;
+  width: min(1000px, 100% - 2 * var(--margem-lateral));
+  aspect-ratio: 4 / 3;
+  margin: var(--espaco-8) auto;
+}
+
+.profundidade .print {
+  position: absolute;
+  width: 38%;
+  height: 60%;
+}
+
+/* [PRINT PROJETO 1]: à esquerda, girado para trás */
+.profundidade .print:nth-child(2) {
+  top: 14%;
+  left: 4%;
+  transform: rotate(-4deg);
+}
+
+/* [PRINT PROJETO 2]: à direita, girado para a frente */
+.profundidade .print:nth-child(3) {
+  top: 8%;
+  right: 4%;
+  transform: rotate(5deg);
+}
+
+/* Print deste site: no centro, maior e por cima (z-index) */
+.profundidade .print--principal {
+  z-index: 1;
+  top: 30%;
+  left: 24%;
+  width: 52%;
+  height: 68%;
+}
+
+@media (min-width: 48rem) {
+  .profundidade {
+    aspect-ratio: 2 / 1;
+    margin-block: var(--espaco-9);
+  }
+}
+
+/* ---------- 3. Portfólio ---------- */
+
+/* A faixa de projetos vai até a borda direita da tela, por isso
+   o recuo fica nos filhos e não na seção */
+.portfolio {
+  padding-inline: 0;
+}
+
+.portfolio__topo,
+.portfolio__lista {
+  padding-inline: var(--recuo-lateral);
+}
+
+.portfolio__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espaco-5);
+}
+
+.portfolio__controles {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.portfolio__contador {
+  color: var(--cor-cinza);
+}
+
+/* Faixa horizontal: overflow-x deixa rolar para o lado,
+   e scroll-snap faz cada card "encaixar" ao soltar o dedo */
+.portfolio__lista {
+  display: flex;
+  gap: var(--espaco-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--recuo-lateral);
+  padding-bottom: var(--espaco-4);
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-borda) transparent;
+}
+
+.projeto {
+  flex: 0 0 290px;
+  scroll-snap-align: start;
+}
+
+/* No desktop, larguras diferentes como no esboço */
+@media (min-width: 64rem) {
+  .projeto:nth-child(1) {
+    flex-basis: 280px;
+  }
+
+  .projeto:nth-child(2) {
+    flex-basis: 620px;
+  }
+
+  .projeto:nth-child(3) {
+    flex-basis: 520px;
+  }
+
+  .projeto:nth-child(4) {
+    flex-basis: 300px;
+  }
+
+  .projeto__print {
+    height: 380px;
+  }
+}
+
+/* ---------- 4. Para quem é ---------- */
+
+.cards {
+  display: grid;
+  gap: var(--espaco-4);
+}
+
+@media (min-width: 64rem) {
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---------- 5. O que está incluso e 7. Dúvidas ---------- */
+
+/* No desktop: título à esquerda, lista à direita */
+@media (min-width: 64rem) {
+  .incluso,
+  .duvidas {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: var(--espaco-7);
+    align-items: start;
+  }
+
+  .incluso .lista-numerada,
+  .duvidas .acordeao {
+    margin-top: 0;
+  }
+}
+
+/* ---------- 6. Como funciona ---------- */
+
+.passos {
+  display: grid;
+  gap: var(--espaco-6);
+}
+
+@media (min-width: 48rem) {
+  .passos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .passos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--espaco-4);
+  }
+}
+
+/* ---------- 8. Contato ---------- */
+
+.contato {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-5);
+  padding-top: var(--espaco-9);
+}
+
+.contato .rotulo + h2 {
+  margin-top: 0; /* aqui o espaço já vem do gap */
+}
+
+.contato h2 {
+  font-size: var(--texto-h2-grande);
+  letter-spacing: -0.035em;
+}
+
+.contato__slogan {
+  color: var(--cor-cinza);
+  font-size: var(--texto-grande);
+}
+
+/* No celular, botão na largura toda */
+.contato .botao {
+  align-self: stretch;
+}
+
+.contato__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-5);
+  color: var(--cor-cinza);
+}
+
+.contato__links li {
+  display: flex;
+  align-items: center;
+  min-height: var(--alvo-toque);
+}
+
+/* O próprio link ocupa os 44 px de altura, para o toque pegar fácil */
+.contato__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-toque);
+  color: var(--cor-cinza);
+}
+
+.contato__links a:hover {
+  color: var(--cor-gelo);
+}
+
+@media (min-width: 48rem) {
+  .contato {
+    align-items: center;
+    text-align: center;
+    padding-top: var(--espaco-10);
+  }
+
+  .contato .botao {
+    align-self: center;
+  }
+
+  .contato__links {
+    justify-content: center;
+  }
+}
+
+/* ---------- Rodapé ---------- */
+
+.rodape {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  /* Espaço embaixo para o botão flutuante não cobrir o texto */
+  padding-block: var(--espaco-6) var(--espaco-9);
+  border-top: 1px solid var(--cor-grade);
+  color: var(--cor-cinza);
+}
+
+@media (min-width: 48rem) {
+  .rodape {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+}

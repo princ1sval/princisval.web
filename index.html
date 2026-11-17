@@ -35,9 +35,9 @@
 
       <nav class="nav" aria-label="Principal">
         <ul class="nav__lista" role="list">
-          <li><a href="#portfolio">portfólio</a></li>
-          <li><a href="#como-funciona">como funciona</a></li>
-          <li><a href="#duvidas">dúvidas</a></li>
+          <li class="nav__texto"><a href="#portfolio">portfólio</a></li>
+          <li class="nav__texto"><a href="#como-funciona">como funciona</a></li>
+          <li class="nav__texto"><a href="#duvidas">dúvidas</a></li>
           <li><a class="botao" href="#contato">Fale comigo <span aria-hidden="true">→</span></a></li>
         </ul>
       </nav>
@@ -63,13 +63,15 @@
            leitores de tela com aria-hidden. -->
       <div class="profundidade" aria-hidden="true">
         <div class="print print--principal">
-          <p class="print__barra mono">princisval.com.br</p>
+          <div class="print__barra mono">princisval.com.br</div>
           <p class="print__tela mono">[PRINT DESTE SITE]</p>
         </div>
         <div class="print">
+          <div class="print__barra"></div>
           <p class="print__tela mono">[PRINT PROJETO 1]</p>
         </div>
         <div class="print">
+          <div class="print__barra"></div>
           <p class="print__tela mono">[PRINT PROJETO 2]</p>
         </div>
       </div>
@@ -138,8 +140,10 @@
 
       <!-- ================= 5. O QUE ESTÁ INCLUSO ================= -->
       <section class="incluso" id="incluso" aria-labelledby="incluso-titulo">
-        <p class="rotulo mono"><span aria-hidden="true">// </span>o que está incluso</p>
-        <h2 id="incluso-titulo">Tudo o que um site profissional <span class="destaque">precisa ter.</span></h2>
+        <div class="secao__topo">
+          <p class="rotulo mono"><span aria-hidden="true">// </span>o que está incluso</p>
+          <h2 id="incluso-titulo">Tudo o que um site profissional <span class="destaque">precisa ter.</span></h2>
+        </div>
 
         <ol class="lista-numerada" role="list">
           <li><span class="lista-numerada__numero mono" aria-hidden="true">01</span> Design feito para a sua identidade</li>
@@ -181,8 +185,10 @@
 
       <!-- ================= 7. DÚVIDAS ================= -->
       <section class="duvidas" id="duvidas" aria-labelledby="duvidas-titulo">
-        <p class="rotulo mono"><span aria-hidden="true">// </span>dúvidas</p>
-        <h2 id="duvidas-titulo">Perguntas <span class="destaque">frequentes.</span></h2>
+        <div class="secao__topo">
+          <p class="rotulo mono"><span aria-hidden="true">// </span>dúvidas</p>
+          <h2 id="duvidas-titulo">Perguntas <span class="destaque">frequentes.</span></h2>
+        </div>
 
         <!-- <details> + <summary>: acordeão nativo do HTML, abre e fecha sem JavaScript -->
         <div class="acordeao">

@@ -1,7 +1,8 @@
 /* =========================================================
    Tokens da marca Princípio Web
-   Todas as decisões visuais moram aqui. Os outros arquivos CSS
-   só usam estas variáveis, nunca valores soltos.
+   Cores, fontes, espaçamentos e raios sempre vêm daqui.
+   Medidas de um componente só (ex.: a largura de um card)
+   podem ficar no próprio componente.
    ========================================================= */
 
 :root {
@@ -14,6 +15,7 @@
   --cor-cinza-texto: #4A5250;  /* texto secundário em fundo claro */
   --cor-grade: #1A1F1F;        /* linhas da grade de fundo */
   --cor-borda: #2E3534;        /* bordas de cards e botões secundários */
+  --cor-superficie: #151A1A;   /* fundo das molduras de print (do esboço) */
 
   /* ---------- Fontes ---------- */
   /* Depois do nome da fonte vêm as reservas, caso ela não carregue */
@@ -26,8 +28,10 @@
      sem passar dos limites. Mínimo = celular, máximo = desktop. */
   --texto-h1: clamp(2.75rem, 7vw, 6rem);         /* 44 → 96 px */
   --texto-h2: clamp(2.125rem, 4.5vw, 3.5rem);    /* 34 → 56 px */
+  --texto-h2-grande: clamp(2.375rem, 6vw, 5rem); /* 38 → 80 px, título do contato */
   --texto-h3: clamp(1.375rem, 2vw, 1.625rem);    /* 22 → 26 px */
   --texto-grande: clamp(1rem, 1.5vw, 1.1875rem); /* 16 → 19 px, subtítulos */
+  --texto-medio: 1.125rem;                       /* 18 px, itens de lista e perguntas */
   --texto-base: 1rem;                            /* 16 px */
   --texto-mono: 0.8125rem;                       /* 13 px, // comentários */
 
@@ -49,9 +53,18 @@
   --raio-card: 16px;    /* cards */
   --raio-pilula: 999px; /* pílula "● agenda aberta" e botões redondos */
 
+  /* ---------- Sombras ---------- */
+  --sombra-flutuante: 0 8px 24px rgb(0 0 0 / 0.45); /* botão do WhatsApp */
+  --sombra-print: 0 30px 80px rgb(0 0 0 / 0.6);     /* print principal da profundidade */
+
   /* ---------- Layout ---------- */
   --grade: 72px;                               /* tamanho de cada quadrado da grade */
   --largura-max: 1200px;                       /* largura máxima do conteúdo */
   --margem-lateral: clamp(1.25rem, 4vw, 2rem); /* 20 px no celular → 32 px */
   --alvo-toque: 44px;                          /* tamanho mínimo de botões e links tocáveis */
+
+  /* Recuo lateral que centraliza o conteúdo em até 1200 px sem <div> extra:
+     o maior entre a margem mínima e "metade do que sobra da tela".
+     Usar só em elementos que ocupam a largura toda da tela. */
+  --recuo-lateral: max(var(--margem-lateral), (100% - var(--largura-max)) / 2);
 }
