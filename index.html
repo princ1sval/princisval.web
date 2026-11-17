@@ -3,6 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Decide, antes da página aparecer, se a tela de carregamento vai rodar:
+         só na primeira visita da sessão e só para quem não pediu menos movimento.
+         Fica aqui, e não no main.js, para a tela não piscar em quem já viu. -->
+    <script>
+      (function () {
+        try {
+          var reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (reduzir || sessionStorage.getItem('principio-loader')) return;
+
+          var raiz = document.documentElement;
+          raiz.classList.add('carregando');
+
+          // Trava de segurança: se o JavaScript principal falhar, a página aparece em 6 s
+          // (a tela de carregamento normal dura ~2,75 s)
+          setTimeout(function () {
+            raiz.classList.remove('carregando');
+          }, 6000);
+        } catch (erro) {
+          // Navegador bloqueou o sessionStorage: segue sem tela de carregamento
+        }
+      })();
+    </script>
+
     <title>Princípio Web: sites profissionais</title>
     <meta
       name="description"
@@ -26,6 +50,14 @@
   </head>
 
   <body>
+    <!-- ================= TELA DE CARREGAMENTO =================
+         Só aparece quando o <html> tem a classe "carregando" (decidido pelo
+         script no <head>). Quem anima é o src/js/loader.js. -->
+    <div class="loader" aria-hidden="true">
+      <p class="loader__simbolo">&lt;</p>
+      <p class="loader__nome">princípio<span class="destaque">.web</span></p>
+    </div>
+
     <!-- ================= CABEÇALHO ================= -->
     <header class="topo">
       <a class="logo" href="#inicio" aria-label="Princípio Web, voltar ao início">

@@ -55,6 +55,56 @@ main > section:last-child {
   }
 }
 
+/* ---------- 0. Tela de carregamento ---------- */
+
+/* Escondida por padrão: só existe quando o <html> tem a classe
+   "carregando" (decidido pelo script no <head> do index.html) */
+.loader {
+  display: none;
+}
+
+/* Enquanto ela está na tela, a página não rola por baixo */
+.carregando {
+  overflow: hidden;
+}
+
+.carregando .loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100; /* acima de tudo, inclusive do botão flutuante */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-3);
+  background-color: var(--cor-carbono);
+  background-image: var(--fundo-grade);
+  background-size: var(--grade) var(--grade);
+}
+
+.loader__simbolo {
+  color: var(--cor-cinza);
+  font-family: var(--fonte-mono);
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Último passo: o <P/> nas cores do logo (P em gelo; setas e barra
+   usam as classes .logo__seta e .logo__barra do components.css) */
+.loader__simbolo--logo {
+  color: var(--cor-gelo);
+}
+
+/* O nome só aparece no último passo (quem mostra é o loader.js) */
+.loader__nome {
+  visibility: hidden;
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-medio);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 /* ---------- Topo (logo + navegação) ---------- */
 
 .topo {

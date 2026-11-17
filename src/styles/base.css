@@ -57,11 +57,8 @@ select {
 body {
   min-height: 100vh;
   background-color: var(--cor-carbono);
-  /* Grade: dois degradês de 1 px (um horizontal e um vertical)
-     que se repetem a cada 72 px, formando os quadrados */
-  background-image:
-    linear-gradient(var(--cor-grade) 1px, transparent 1px),
-    linear-gradient(90deg, var(--cor-grade) 1px, transparent 1px);
+  /* Grade de fundo (definida no tokens.css) */
+  background-image: var(--fundo-grade);
   background-size: var(--grade) var(--grade);
   color: var(--cor-gelo);
   font-family: var(--fonte-texto);

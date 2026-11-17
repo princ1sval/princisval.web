@@ -1,7 +1,6 @@
 // =========================================================
 // Ponto de entrada do site: o Vite começa por aqui.
-// Nesta etapa só carrega fontes e estilos. Os efeitos
-// (loader, esfera, profundidade, portfólio) entram depois.
+// Carrega fontes e estilos e inicia os efeitos.
 // =========================================================
 
 // ---------- Fontes (Fontsource) ----------
@@ -18,5 +17,11 @@ import '@fontsource/jetbrains-mono/500.css' // símbolo <P/> do logo
 // A ordem importa: cada arquivo usa o que veio antes.
 import './styles/tokens.css' // variáveis da marca
 import './styles/base.css' // reset, tipografia, grade de fundo
-import './styles/components.css' // botões, pílula, cards (próxima etapa)
-import './styles/sections.css' // estilos de cada seção (próxima etapa)
+import './styles/components.css' // botões, pílula, cards, botão flutuante
+import './styles/sections.css' // estilos de cada seção
+
+// ---------- Efeitos ----------
+import { iniciarLoader } from './js/loader.js'
+
+// 1. Tela de carregamento (só na primeira visita da sessão)
+iniciarLoader()

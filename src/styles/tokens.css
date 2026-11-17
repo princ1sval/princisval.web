@@ -59,6 +59,13 @@
 
   /* ---------- Layout ---------- */
   --grade: 72px;                               /* tamanho de cada quadrado da grade */
+
+  /* Grade de fundo: duas linhas de 1 px (uma deitada, uma em pé) que,
+     repetidas a cada --grade, formam os quadrados. Usar sempre com
+     background-size: var(--grade) var(--grade). */
+  --fundo-grade:
+    linear-gradient(var(--cor-grade) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cor-grade) 1px, transparent 1px);
   --largura-max: 1200px;                       /* largura máxima do conteúdo */
   --margem-lateral: clamp(1.25rem, 4vw, 2rem); /* 20 px no celular → 32 px */
   --alvo-toque: 44px;                          /* tamanho mínimo de botões e links tocáveis */
