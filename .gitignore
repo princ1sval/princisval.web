@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Contexto do Claude Code (privado, fica só no computador)
+CLAUDE.md
+CLAUDE.local.md
+.claude/
