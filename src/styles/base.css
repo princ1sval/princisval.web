@@ -1,0 +1,160 @@
+/* =========================================================
+   Base: reset, tipografia e grade de fundo
+   Estilos aplicados direto nas tags (body, h1, a...),
+   que valem para a página inteira.
+   ========================================================= */
+
+/* ---------- Reset ---------- */
+
+/* A largura de um elemento passa a incluir borda e espaçamento interno */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Tira as margens que o navegador coloca sozinho */
+* {
+  margin: 0;
+}
+
+html {
+  /* Impede o celular de aumentar o texto sozinho ao girar a tela */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Imagens e afins não passam da largura do espaço onde estão */
+img,
+picture,
+svg,
+canvas,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+/* Botões e campos usam a mesma fonte do resto da página.
+   As cores deles ficam para o components.css. */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Listas com role="list" perdem as bolinhas/números padrão.
+   O role mantém a lista reconhecida por leitores de tela no Safari. */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+  padding: 0;
+}
+
+/* ---------- Página e grade de fundo ---------- */
+
+body {
+  min-height: 100vh;
+  background-color: var(--cor-carbono);
+  /* Grade: dois degradês de 1 px (um horizontal e um vertical)
+     que se repetem a cada 72 px, formando os quadrados */
+  background-image:
+    linear-gradient(var(--cor-grade) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cor-grade) 1px, transparent 1px);
+  background-size: var(--grade) var(--grade);
+  color: var(--cor-gelo);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-base);
+  font-weight: 400;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Tipografia ---------- */
+
+h1,
+h2,
+h3 {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  line-height: 1.05;
+  /* Evita títulos com uma palavra sozinha na última linha */
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--texto-h1);
+  letter-spacing: -0.035em;
+}
+
+h2 {
+  font-size: var(--texto-h2);
+  letter-spacing: -0.03em;
+}
+
+h3 {
+  font-size: var(--texto-h3);
+  letter-spacing: -0.02em;
+}
+
+p {
+  /* Evita palavra sozinha no fim do parágrafo */
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--cor-lima);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--cor-gelo);
+}
+
+summary {
+  cursor: pointer;
+}
+
+/* Texto selecionado com o mouse nas cores da marca */
+::selection {
+  background-color: var(--cor-lima);
+  color: var(--cor-carbono);
+}
+
+/* ---------- Classes utilitárias ---------- */
+
+/* A palavra em lima de cada título: "à altura.", "no ar." */
+.destaque {
+  color: var(--cor-lima);
+}
+
+/* Detalhes de "código": // comentários, numeração 01, @, URL */
+.mono {
+  font-family: var(--fonte-mono);
+  font-size: var(--texto-mono);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* ---------- Acessibilidade ---------- */
+
+/* Contorno lima ao navegar pelo teclado (Tab).
+   :focus-visible não aparece no clique do mouse, só no teclado. */
+:focus-visible {
+  outline: 2px solid var(--cor-lima);
+  outline-offset: 3px;
+}
+
+/* Quem pediu menos movimento no sistema não vê animações nem transições.
+   Os efeitos das próximas etapas também vão respeitar isso. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

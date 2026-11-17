@@ -1,0 +1,57 @@
+/* =========================================================
+   Tokens da marca Princípio Web
+   Todas as decisões visuais moram aqui. Os outros arquivos CSS
+   só usam estas variáveis, nunca valores soltos.
+   ========================================================= */
+
+:root {
+  /* ---------- Cores ---------- */
+  --cor-carbono: #0E1111;      /* fundo principal */
+  --cor-lima: #C6F432;         /* destaque, botões, barra do logo */
+  --cor-cinza: #9AA19E;        /* texto de apoio no escuro */
+  --cor-gelo: #F2F2EF;         /* texto no escuro */
+  --cor-musgo: #4D6B00;        /* destaque em fundo claro (no lugar do lima) */
+  --cor-cinza-texto: #4A5250;  /* texto secundário em fundo claro */
+  --cor-grade: #1A1F1F;        /* linhas da grade de fundo */
+  --cor-borda: #2E3534;        /* bordas de cards e botões secundários */
+
+  /* ---------- Fontes ---------- */
+  /* Depois do nome da fonte vêm as reservas, caso ela não carregue */
+  --fonte-titulo: "Space Grotesk", system-ui, sans-serif;
+  --fonte-texto: "Inter", system-ui, sans-serif;
+  --fonte-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+
+  /* ---------- Tamanhos de texto ---------- */
+  /* clamp(mínimo, ideal, máximo): cresce com a largura da tela,
+     sem passar dos limites. Mínimo = celular, máximo = desktop. */
+  --texto-h1: clamp(2.75rem, 7vw, 6rem);         /* 44 → 96 px */
+  --texto-h2: clamp(2.125rem, 4.5vw, 3.5rem);    /* 34 → 56 px */
+  --texto-h3: clamp(1.375rem, 2vw, 1.625rem);    /* 22 → 26 px */
+  --texto-grande: clamp(1rem, 1.5vw, 1.1875rem); /* 16 → 19 px, subtítulos */
+  --texto-base: 1rem;                            /* 16 px */
+  --texto-mono: 0.8125rem;                       /* 13 px, // comentários */
+
+  /* ---------- Espaçamentos ---------- */
+  --espaco-1: 0.25rem;  /*   4 px */
+  --espaco-2: 0.5rem;   /*   8 px */
+  --espaco-3: 0.75rem;  /*  12 px */
+  --espaco-4: 1rem;     /*  16 px */
+  --espaco-5: 1.5rem;   /*  24 px */
+  --espaco-6: 2rem;     /*  32 px */
+  --espaco-7: 3rem;     /*  48 px */
+  --espaco-8: 4rem;     /*  64 px */
+  --espaco-9: 6rem;     /*  96 px */
+  --espaco-10: 8rem;    /* 128 px */
+
+  /* ---------- Raios (cantos arredondados) ---------- */
+  --raio-print: 12px;   /* molduras dos prints */
+  --raio-botao: 14px;   /* botões */
+  --raio-card: 16px;    /* cards */
+  --raio-pilula: 999px; /* pílula "● agenda aberta" e botões redondos */
+
+  /* ---------- Layout ---------- */
+  --grade: 72px;                               /* tamanho de cada quadrado da grade */
+  --largura-max: 1200px;                       /* largura máxima do conteúdo */
+  --margem-lateral: clamp(1.25rem, 4vw, 2rem); /* 20 px no celular → 32 px */
+  --alvo-toque: 44px;                          /* tamanho mínimo de botões e links tocáveis */
+}
