@@ -21,7 +21,7 @@ import './styles/components.css' // botões, pílula, cards, botão flutuante
 import './styles/sections.css' // estilos de cada seção
 
 // ---------- Efeitos ----------
-import { iniciarLoader } from './js/loader.js'
-
-// 1. Tela de carregamento (só na primeira visita da sessão)
-iniciarLoader()
+// 1. Tela de carregamento: roda direto do index.html (precisa estar na
+//    tela antes deste arquivo baixar). Os próximos efeitos da abertura
+//    esperam por ela com introTerminou(), do ./js/loader.js:
+//      introTerminou().then(() => iniciarHero())
