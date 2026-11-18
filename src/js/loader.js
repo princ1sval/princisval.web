@@ -3,6 +3,7 @@
 // Símbolos de código trocam no centro da grade e formam o
 // <P/>. A sequência se repete por 2,5 s, termina no logo,
 // e então a tela é recortada e a página aparece.
+// No modo infinito (página "em breve"), ela repete para sempre.
 // =========================================================
 
 import { gsap } from 'gsap'
@@ -21,11 +22,15 @@ const LOGO =
   '<span class="logo__seta">&lt;</span>P<span class="logo__barra">/</span><span class="logo__seta">&gt;</span>'
 
 /**
- * Roda a tela de carregamento, se o script do <head> decidiu que ela deve rodar.
+ * Roda a tela de carregamento, se o <html> tiver a classe "carregando".
  * Devolve uma Promise (uma "promessa" de aviso) que se cumpre quando a página
  * está visível. O próximo efeito, o título letra por letra, vai esperar por ela.
+ *
+ * @param {object} opcoes
+ * @param {boolean} opcoes.infinito  true = repete para sempre, sem corte
+ *                                   (página "em breve")
  */
-export function iniciarLoader() {
+export function iniciarLoader({ infinito = false } = {}) {
   const raiz = document.documentElement
   const loader = document.querySelector('.loader')
 
@@ -33,13 +38,6 @@ export function iniciarLoader() {
   // não há nada a fazer, a promessa já se cumpre na hora
   if (!raiz.classList.contains('carregando') || !loader) {
     return Promise.resolve()
-  }
-
-  // Marca que esta sessão já viu a tela
-  try {
-    sessionStorage.setItem('principio-loader', 'visto')
-  } catch {
-    // Navegador bloqueou o armazenamento: a tela só aparece de novo na próxima visita
   }
 
   const simbolo = loader.querySelector('.loader__simbolo')
@@ -59,6 +57,41 @@ export function iniciarLoader() {
     nome.style.visibility = 'visible'
   }
 
+  // Coloca uma volta (4 símbolos + logo) na linha do tempo, a partir de "inicio"
+  function adicionarVolta(linha, inicio) {
+    SIMBOLOS.forEach((texto, i) => {
+      linha.call(mostrarSimbolo, [texto], inicio + i * PASSO)
+    })
+    linha.call(mostrarLogo, null, inicio + SIMBOLOS.length * PASSO)
+  }
+
+  // ---------- Modo infinito (página "em breve") ----------
+  if (infinito) {
+    // Quem pediu menos movimento vê o logo parado
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      mostrarLogo()
+      return Promise.resolve()
+    }
+
+    // Uma volta só, com repeat: -1 (repetir para sempre)
+    const linha = gsap.timeline({ repeat: -1 })
+    adicionarVolta(linha, 0)
+    // Um "tempo vazio" depois do logo, para ele ficar na tela antes de recomeçar
+    linha.to({}, { duration: SEGURA_LOGO }, SIMBOLOS.length * PASSO)
+
+    // A tela nunca sai, então a promessa nunca se cumpre
+    return new Promise(() => {})
+  }
+
+  // ---------- Modo normal (site completo) ----------
+
+  // Marca que esta sessão já viu a tela
+  try {
+    sessionStorage.setItem('principio-loader', 'visto')
+  } catch {
+    // Navegador bloqueou o armazenamento: a tela só aparece de novo na próxima visita
+  }
+
   return new Promise((cumprir) => {
     // A timeline é uma linha do tempo: cada passo recebe o segundo em que acontece
     const linha = gsap.timeline({
@@ -74,10 +107,7 @@ export function iniciarLoader() {
     // (logo em 0,6 s, 1,4 s e 2,2 s), e o último logo fica até o corte.
     const volta = SIMBOLOS.length * PASSO + SEGURA_LOGO
     for (let inicio = 0; inicio + SIMBOLOS.length * PASSO <= DURACAO; inicio += volta) {
-      SIMBOLOS.forEach((texto, i) => {
-        linha.call(mostrarSimbolo, [texto], inicio + i * PASSO)
-      })
-      linha.call(mostrarLogo, null, inicio + SIMBOLOS.length * PASSO)
+      adicionarVolta(linha, inicio)
     }
 
     // 2,5 s: corte rápido. O clip-path recorta a tela de baixo para cima
