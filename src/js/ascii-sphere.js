@@ -64,12 +64,14 @@ const BOLINHA = 34 // raio da bolinha apertada, em px
 const ESPALHA = 0.95 // o quanto se espalham: 1 = até as bordas da tela (alguns passam e somem)
 const FUNDO_TOM_MAX = 4 // espalhados, usam só os tons mais apagados (0 a este)
 
-// A luz na borda dos cards: com o mouse em cima de um card (que esconde os
-// caracteres do fundo), a luz contorna a borda dele, perto do ponteiro
+// A luz na borda dos cards: com o mouse em cima de um card, SÓ a borda reage
+// (o fundo em volta não acende) e ela acende inteira, contornando o card.
+// Perto do ponteiro o brilho é mais forte, para a luz "seguir" o mouse.
 const CARDS = '.card, .projeto__print, .print' // o que conta como card
 const BORDA_AFASTA = 10 // px da borda até os caracteres (por fora do card)
 const BORDA_PASSO = 15 // px entre um caractere e o próximo, ao longo da borda
-const BORDA_ALCANCE = 240 // até quantos px do ponteiro a borda acende
+const BORDA_BASE = 0.5 // brilho da borda longe do ponteiro (0 a 1)
+const BORDA_ALCANCE = 240 // até quantos px do ponteiro o brilho vai além da base
 const BORDA_ACENDE = 6 // velocidade com que a borda acende/apaga (por segundo)
 
 // Cores: tons de "grade" (do fundo para a frente) e o lima
@@ -216,7 +218,8 @@ export function iniciarEsfera() {
 
     // De onde vem a luz: o cursor, o último toque ou o passeio sozinho (celular)
     luzAtual = cursor
-    let luz = cursor
+    // com o mouse em um card, só a borda dele reage: o fundo não acende
+    let luz = cardSobMouse ? null : cursor
     if (semMouse && !parada && performance.now() > toqueAte) {
       luz = {
         x: cx + raio * 0.55 * Math.sin(relogio * 0.31),
@@ -308,7 +311,7 @@ export function iniciarEsfera() {
     return aceso
   }
 
-  // Caracteres em volta da borda do card, acesos perto do ponteiro.
+  // Caracteres em volta da borda inteira do card, mais fortes perto do ponteiro.
   // Ficam BORDA_AFASTA px por fora, onde o card não cobre.
   // Devolve true enquanto a borda ainda está acesa.
   function desenharBorda(dt, letra, folha, lado) {
@@ -336,10 +339,10 @@ export function iniciarEsfera() {
 
     for (let s = 0, i = 0; s < contorno.total; s += passo, i++) {
       const [x, y] = contorno.ponto(s)
-      const d = Math.hypot(x - luzAtual.x, y - luzAtual.y)
-      if (d > alcance) continue
-      const t = 1 - d / alcance
-      const forca = t * t * (3 - 2 * t) * bordaLuz
+      // a borda toda acende (BORDA_BASE); perto do ponteiro, até o máximo
+      const t = Math.max(0, 1 - Math.hypot(x - luzAtual.x, y - luzAtual.y) / alcance)
+      const perto = t * t * (3 - 2 * t)
+      const forca = (BORDA_BASE + (1 - BORDA_BASE) * perto) * bordaLuz
       if (forca < 0.05) continue
       const cor = NIVEIS_TOM + Math.min(NIVEIS_LIMA - 1, Math.floor(forca * NIVEIS_LIMA))
       // símbolo fixo por posição, que às vezes troca (como os acesos do fundo)
