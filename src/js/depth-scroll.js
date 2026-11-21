@@ -37,6 +37,8 @@ export function iniciarProfundidade() {
   const resto = cena.querySelectorAll('.abertura > :not(h1):not(.abertura__esfera)') // pílula, rótulo, subtítulo, botões
   const palco = cena.querySelector('.profundidade')
   const [principal, esquerda, direita] = palco.querySelectorAll('.print')
+  const topo = document.querySelector('.topo') // o menu, acima da cena
+  const alturaTopo = () => (topo ? topo.offsetHeight : 0)
 
   const telas = gsap.matchMedia()
 
@@ -47,19 +49,27 @@ export function iniciarProfundidade() {
     // Os prints começam pequenos, transparentes e mais baixos (e centralizados com -50%)
     gsap.set(palco, { xPercent: -50, yPercent: -50 })
 
+    // A animação começa já na primeira rolada (start: 0 = rolagem zero) e
+    // termina depois de DURACAO alturas de tela. O menu fica fora da cena,
+    // então ele também é preso (sem ocupar espaço extra: pinSpacing false)
+    // para sair com a animação em vez de simplesmente rolar para fora.
+    const fim = () => window.innerHeight * DURACAO
+    if (topo) ScrollTrigger.create({ trigger: topo, start: 0, end: fim, pin: true, pinSpacing: false })
+
     const linha = gsap.timeline({
       defaults: { ease: 'none' }, // com scrub, quem dá o ritmo é a rolagem
       scrollTrigger: {
         trigger: cena,
-        start: 'top top',
-        end: () => `+=${window.innerHeight * DURACAO}`,
+        start: 0,
+        end: fim,
         pin: true,
         scrub: SUAVE,
         invalidateOnRefresh: true, // recalcula as posições quando a janela muda de tamanho
       },
     })
 
-    // 1. O resto da abertura some primeiro, subindo um pouco
+    // 1. O menu e o resto da abertura somem primeiro, subindo um pouco
+    if (topo) linha.to(topo, { yPercent: -60, autoAlpha: 0, duration: 0.3 }, 0)
     linha.to(resto, { autoAlpha: 0, y: -40, duration: 0.35, stagger: 0.04 }, 0)
 
     // 2. O título encolhe e sobe até perto do topo
@@ -74,7 +84,8 @@ export function iniciarProfundidade() {
           const abertura = titulo.offsetParent
           const altura = titulo.offsetHeight
           const alturaFinal = altura * TITULO_ESCALA
-          const centroAgora = abertura.offsetTop + titulo.offsetTop + altura / 2
+          // (a cena fica logo abaixo do menu, por isso soma a altura dele)
+          const centroAgora = alturaTopo() + abertura.offsetTop + titulo.offsetTop + altura / 2
           const centroFinal = window.innerHeight * TITULO_TOPO + alturaFinal / 2
           return centroFinal - centroAgora
         },
@@ -90,7 +101,8 @@ export function iniciarProfundidade() {
     linha.fromTo(
       palco,
       { scale: PRINTS_ESCALA_INICIAL, y: PRINTS_DESCE, autoAlpha: 0 },
-      { scale: 1, y: 0, autoAlpha: 1, duration: 1 },
+      // termina subindo a altura do menu: com ele fora, os prints ficam centralizados na tela
+      { scale: 1, y: () => -alturaTopo(), autoAlpha: 1, duration: 1 },
       0.15,
     )
     // os laterais se abrem um pouco para os lados, e o do centro chega por último
