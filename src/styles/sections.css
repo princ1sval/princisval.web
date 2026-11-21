@@ -115,8 +115,7 @@ main > section:last-child {
 
 .abertura {
   position: relative; /* referência para a esfera ao fundo */
-  isolation: isolate; /* a esfera (z-index -1) fica atrás do texto, mas dentro da seção */
-  overflow: hidden; /* a parte da esfera que passa da seção é cortada */
+  isolation: isolate; /* a esfera (z-index -1) fica atrás do texto da abertura */
   display: flex;
   flex-direction: column;
   align-items: flex-start; /* no celular, tudo alinhado à esquerda */
@@ -124,12 +123,15 @@ main > section:last-child {
   padding-top: var(--espaco-8);
 }
 
-/* Esfera de caracteres: cobre a abertura inteira, atrás do texto.
+/* Esfera de caracteres: atrás do texto da abertura. O ascii-sphere.js
+   ajusta top e height para ela passar da seção (sobe por trás do menu e
+   desce sobre o espaço dos prints). Embaixo ela esmaece em vez de cortar.
    pointer-events: none deixa os cliques passarem para os botões.
-   Começa invisível e aparece junto com a abertura (ascii-sphere.js). */
+   Começa invisível e aparece junto com a abertura. */
 .abertura__esfera {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   z-index: -1;
   width: 100%;
   height: 100%;
@@ -137,6 +139,14 @@ main > section:last-child {
   pointer-events: none;
   opacity: 0;
   transition: opacity 1.2s ease;
+  -webkit-mask-image: linear-gradient(to bottom, #000 var(--esfera-esmaece, 85%), transparent);
+  mask-image: linear-gradient(to bottom, #000 var(--esfera-esmaece, 85%), transparent);
+}
+
+/* O menu fica por cima da esfera, que sobe por trás dele */
+.topo {
+  position: relative;
+  z-index: 1;
 }
 
 .abertura__esfera--ativa {

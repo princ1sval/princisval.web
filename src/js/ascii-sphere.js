@@ -61,8 +61,11 @@ export function iniciarEsfera() {
   const ctx = canvas.getContext('2d')
 
   // ---------- Estado ----------
-  let largura = 0
+  let largura = 0 // tamanho do canvas, em px
   let altura = 0
+  let cx = 0 // centro e raio da esfera, em px dentro do canvas
+  let cy = 0
+  let raio = 0
   let dpr = 1
   let celular = false
   let pontos = []
@@ -78,12 +81,30 @@ export function iniciarEsfera() {
   let relogio = 0 // tempo da animação em segundos (só anda enquanto roda)
 
   // ---------- Tamanho do canvas (e do atlas) ----------
+  // A esfera é posicionada pela abertura, mas o canvas pode passar dela:
+  // sobe por trás do menu (até o topo da página) e desce sobre o espaço
+  // dos prints, o quanto a esfera precisar. A parte de baixo esmaece (CSS).
   function medir() {
     const caixa = secao.getBoundingClientRect()
+    const alturaSecao = caixa.height
     largura = caixa.width
-    altura = caixa.height
     const eraCelular = celular
     celular = largura < 768 || semMouse
+
+    const conf = celular ? ESFERA_CELULAR : ESFERA
+    raio = Math.min(largura, alturaSecao * 1.6) * conf.raio
+    const centroNaSecao = alturaSecao * conf.centroY
+    const folga = raio * 1.06 + LETRA * 2 // a perspectiva aumenta um pouco a borda
+    const acima = Math.max(0, Math.min(caixa.top + window.scrollY, folga - centroNaSecao))
+    const abaixo = Math.max(0, centroNaSecao + folga - alturaSecao)
+    altura = acima + alturaSecao + abaixo
+    cx = largura / 2
+    cy = acima + centroNaSecao
+    canvas.style.top = `${-acima}px`
+    canvas.style.height = `${altura}px`
+    // o esmaecer começa um pouco antes do fim da abertura e vai até o pé do canvas
+    canvas.style.setProperty('--esfera-esmaece', `${((acima + alturaSecao * 0.85) / altura) * 100}%`)
+
     dpr = Math.min(window.devicePixelRatio || 1, celular ? 1.5 : 2)
     canvas.width = Math.round(largura * dpr)
     canvas.height = Math.round(altura * dpr)
@@ -136,10 +157,6 @@ export function iniciarEsfera() {
 
   // ---------- Um quadro ----------
   function desenhar(dt) {
-    const conf = celular ? ESFERA_CELULAR : ESFERA
-    const cx = largura / 2
-    const cy = altura * conf.centroY
-    const raio = Math.min(largura, altura * 1.6) * conf.raio
     const letra = celular ? LETRA_CELULAR : LETRA
     const alcance = celular ? ALCANCE_CELULAR : ALCANCE
 
@@ -248,21 +265,22 @@ export function iniciarEsfera() {
       return
     }
 
-    // Pausa quando a abertura sai da tela ou a aba fica escondida
+    // Pausa quando a esfera sai da tela ou a aba fica escondida
     new IntersectionObserver(([item]) => {
       visivel = item.isIntersecting
       visivel ? ligar() : desligar()
-    }).observe(secao)
+    }).observe(canvas)
     document.addEventListener('visibilitychange', () => (document.hidden ? desligar() : ligar()))
 
-    // Cursor (computador) e toque (celular)
-    secao.addEventListener('pointermove', (e) => {
+    // Cursor (computador) e toque (celular). Ouve a janela toda, porque a
+    // esfera passa da abertura (o menu e o espaço dos prints também contam).
+    window.addEventListener('pointermove', (e) => {
       if (e.pointerType === 'mouse' || e.pointerType === 'pen') cursor = posicao(e)
     })
-    secao.addEventListener('pointerleave', (e) => {
-      if (e.pointerType === 'mouse' || e.pointerType === 'pen') cursor = null
+    document.documentElement.addEventListener('pointerleave', () => {
+      cursor = null // o mouse saiu da janela
     })
-    secao.addEventListener('pointerdown', (e) => {
+    window.addEventListener('pointerdown', (e) => {
       if (e.pointerType !== 'touch') return
       cursor = posicao(e)
       toqueAte = performance.now() + TOQUE_DURA
