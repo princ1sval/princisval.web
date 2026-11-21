@@ -27,6 +27,7 @@ import './styles/sections.css' // estilos de cada seção
 import { iniciarHero } from './js/hero.js'
 import { iniciarEsfera } from './js/ascii-sphere.js'
 import { iniciarProfundidade } from './js/depth-scroll.js'
+import { iniciarPortfolio } from './js/portfolio.js'
 
 // 2. Título acendendo letra por letra (começa junto com o corte da tela)
 iniciarHero()
@@ -36,3 +37,7 @@ iniciarEsfera()
 
 // 4. Rolagem com profundidade: o título encolhe e os prints se aproximam
 iniciarProfundidade()
+
+// 5. Portfólio: entrada, faixa que anda para o lado com a rolagem, setas e contador
+//    (depois da profundidade: o ScrollTrigger calcula na ordem em que foi criado)
+iniciarPortfolio()

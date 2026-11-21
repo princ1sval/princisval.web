@@ -311,6 +311,7 @@ main > section:last-child {
 /* Faixa horizontal: overflow-x deixa rolar para o lado,
    e scroll-snap faz cada card "encaixar" ao soltar o dedo */
 .portfolio__lista {
+  position: relative; /* o portfolio.js mede a posição dos cards a partir daqui */
   display: flex;
   gap: var(--espaco-4);
   overflow-x: auto;
@@ -347,6 +348,30 @@ main > section:last-child {
   .projeto__print {
     height: 23.75rem; /* 380 px */
   }
+}
+
+/* Portfólio animado (computador, com portfolio.js): quem move a faixa é
+   a rolagem da página, então ela não rola sozinha nem mostra barra.
+   overflow: clip na seção esconde os cards que passam da tela sem
+   criar rolagem para o lado. */
+.portfolio--animado {
+  overflow: clip;
+}
+
+.portfolio--animado .portfolio__lista {
+  overflow: visible;
+  scroll-snap-type: none;
+}
+
+/* Setas desligadas no primeiro e no último card */
+.botao-redondo:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.botao-redondo:disabled:hover {
+  border-color: var(--cor-borda);
+  color: var(--cor-gelo);
 }
 
 /* ---------- 4. Para quem é ---------- */
