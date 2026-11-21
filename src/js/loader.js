@@ -20,7 +20,7 @@ const P_DURACAO = 280
 const NOME_ATRASO = 60 // o "princípio.web" entra logo depois do P
 const NOME_SOBE = 6 // px
 const NOME_DURACAO = 400
-const SEGURA = 2200 // quanto tempo o logo fica na tela antes de recomeçar
+const SEGURA = 1200 // quanto tempo o logo fica na tela antes de recomeçar
 const SAI = 300 // o logo sumindo antes da próxima volta
 
 // ---------- Curvas ----------
