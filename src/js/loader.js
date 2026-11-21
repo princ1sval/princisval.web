@@ -16,3 +16,12 @@
 export function introTerminou() {
   return window.principioIntro ? window.principioIntro.fim : Promise.resolve()
 }
+
+/**
+ * Promessa que se cumpre quando o corte começa (o logo sai e a abertura
+ * aparece por baixo), ou na hora em que a pessoa pula a tela. Se a tela
+ * não rodou, se cumpre na hora. É o momento em que o título começa a acender.
+ */
+export function introCortou() {
+  return (window.principioIntro && window.principioIntro.corte) || Promise.resolve()
+}

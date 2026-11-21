@@ -13,6 +13,9 @@
         var raiz = document.documentElement;
         if (!window.matchMedia || !window.FontFace || !document.timeline || !raiz.animate) return;
         if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        // O título da abertura começa apagado e o hero.js acende letra por letra
+        // (em toda visita, não só na primeira)
+        raiz.classList.add('hero-anima');
         var pedido = /[?&]intro(?:=([^&]*))?(?:&|$)/.exec(location.search);
         if (pedido) {
           var velocidade = parseFloat(pedido[1]);
@@ -201,6 +204,28 @@
       .intro-palavra {
         display: inline-block;
       }
+
+      /* =========================================================
+         TÍTULO DA ABERTURA: começa apagado
+         Fica aqui para valer já no primeiro quadro (sem piscar aceso).
+         O hero.js separa as letras, tira o apagado do título todo
+         (.hero-pronto) e acende uma por uma.
+         ========================================================= */
+      html.hero-anima #abertura-titulo {
+        --hero-apagada: 0.14; /* o quanto a letra apagada aparece (0 = some, 1 = acesa) */
+        opacity: var(--hero-apagada);
+        /* se o JavaScript falhar, o título acende sozinho depois disso */
+        animation: hero-seguranca 0.4s ease calc(5s / var(--intro-velocidade, 1)) forwards;
+      }
+      html.hero-anima #abertura-titulo.hero-pronto {
+        opacity: 1;
+        animation: none;
+      }
+      @keyframes hero-seguranca {
+        to {
+          opacity: 1;
+        }
+      }
     </style>
 
     <title>Princípio Web: sites profissionais</title>
@@ -293,7 +318,8 @@
         // principioIntro.fim: promessa que se cumpre quando a abertura termina de entrar.
         // principioIntro.rever(): roda de novo sem recarregar (no console; 0.25 = câmera lenta).
         var molde = original.cloneNode(true);
-        var api = (window.principioIntro = { fim: Promise.resolve(), rever: rever });
+        // principioIntro.corte: promessa que se cumpre quando o corte começa (o hero.js espera por ela).
+        var api = (window.principioIntro = { fim: Promise.resolve(), corte: Promise.resolve(), rever: rever });
         var ocupado = false;
 
         if (raiz.classList.contains('com-intro')) rodar(original);
@@ -339,6 +365,10 @@
           var avisarFim;
           api.fim = new Promise(function (cumprir) {
             avisarFim = cumprir;
+          });
+          var avisarCorte;
+          api.corte = new Promise(function (cumprir) {
+            avisarCorte = cumprir;
           });
 
           // Agenda uma animação. "delay" conta do primeiro quadro (o startTime em comum).
@@ -483,6 +513,7 @@
             var corte = anima(camada, [{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 100% 0)' }], cortar);
             anima(palco, [{ transform: 'none' }, { transform: 'translateY(-' + CORTE_SOBE + 'px)' }], cortar);
             corte.finished.then(terminar, function () {});
+            quando(inicioDoCorte, avisarCorte); // o título começa a acender junto com o corte
 
             // logo em seguida, a abertura entra linha a linha
             if (document.readyState !== 'loading') agendarEntrada(inicioDoCorte);
@@ -597,6 +628,7 @@
             if (estado !== 'rodando') return;
             if (inicio !== null && document.timeline.currentTime - inicio >= inicioDoCorte) return; // o corte já começou
             estado = 'pulando';
+            avisarCorte(); // pulou: o título começa a acender já
             // congela o que está na camada e cancela o resto (a abertura volta ao normal por baixo)
             animacoes.forEach(function (a) {
               var alvo = a.effect && a.effect.target;
@@ -612,6 +644,7 @@
           function terminar() {
             if (estado === 'fim') return;
             estado = 'fim';
+            avisarCorte(); // garantia: se ainda não avisou, avisa agora
             camada.remove();
             raiz.classList.remove('com-intro');
             gatilhos.forEach(function (tipo) {
@@ -655,12 +688,13 @@
     <main>
       <!-- ================= 1. ABERTURA =================
            data-intro-entrada: entra subindo logo depois da tela de carregamento,
-           na ordem do HTML. ="linhas": o título entra linha a linha.
-           ="ultimo": entra por último (os botões do WhatsApp). -->
+           na ordem do HTML. ="linhas": o texto entra linha a linha.
+           ="ultimo": entra por último (os botões do WhatsApp).
+           O título não entra subindo: ele acende letra por letra (src/js/hero.js). -->
       <section class="abertura" id="inicio" aria-labelledby="abertura-titulo">
         <p class="pilula mono" data-intro-entrada><span aria-hidden="true">●</span> agenda aberta</p>
         <p class="rotulo mono" data-intro-entrada><span aria-hidden="true">// </span>sites e landing pages</p>
-        <h1 id="abertura-titulo" data-intro-entrada="linhas">Seu trabalho merece um endereço <span class="destaque">à altura.</span></h1>
+        <h1 id="abertura-titulo">Seu trabalho merece um endereço <span class="destaque">à altura.</span></h1>
         <p class="abertura__subtitulo" data-intro-entrada>Sites profissionais para advogados, psicólogos e profissionais liberais.</p>
         <div class="abertura__botoes">
           <a class="botao" href="https://wa.me/[NÚMERO]" target="_blank" rel="noopener" data-intro-entrada="ultimo">Chamar no WhatsApp <span aria-hidden="true">→</span></a>

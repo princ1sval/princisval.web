@@ -25,3 +25,7 @@ import './styles/sections.css' // estilos de cada seção
 //    tela antes deste arquivo baixar). Os próximos efeitos da abertura
 //    esperam por ela com introTerminou(), do ./js/loader.js:
 //      introTerminou().then(() => iniciarHero())
+import { iniciarHero } from './js/hero.js'
+
+// 2. Título acendendo letra por letra (começa junto com o corte da tela)
+iniciarHero()
