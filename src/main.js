@@ -22,10 +22,13 @@ import './styles/sections.css' // estilos de cada seção
 
 // ---------- Efeitos ----------
 // 1. Tela de carregamento: roda direto do index.html (precisa estar na
-//    tela antes deste arquivo baixar). Os próximos efeitos da abertura
-//    esperam por ela com introTerminou(), do ./js/loader.js:
-//      introTerminou().then(() => iniciarHero())
+//    tela antes deste arquivo baixar). Os efeitos da abertura esperam
+//    o corte dela com introCortou(), do ./js/loader.js.
 import { iniciarHero } from './js/hero.js'
+import { iniciarEsfera } from './js/ascii-sphere.js'
 
 // 2. Título acendendo letra por letra (começa junto com o corte da tela)
 iniciarHero()
+
+// 3. Esfera de caracteres ao fundo da abertura (aparece junto com o corte)
+iniciarEsfera()

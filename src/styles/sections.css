@@ -114,11 +114,33 @@ main > section:last-child {
 /* ---------- 1. Abertura ---------- */
 
 .abertura {
+  position: relative; /* referência para a esfera ao fundo */
+  isolation: isolate; /* a esfera (z-index -1) fica atrás do texto, mas dentro da seção */
+  overflow: hidden; /* a parte da esfera que passa da seção é cortada */
   display: flex;
   flex-direction: column;
   align-items: flex-start; /* no celular, tudo alinhado à esquerda */
   gap: var(--espaco-5);
   padding-top: var(--espaco-8);
+}
+
+/* Esfera de caracteres: cobre a abertura inteira, atrás do texto.
+   pointer-events: none deixa os cliques passarem para os botões.
+   Começa invisível e aparece junto com a abertura (ascii-sphere.js). */
+.abertura__esfera {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.abertura__esfera--ativa {
+  opacity: 1;
 }
 
 .abertura h1 {
