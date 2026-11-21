@@ -4,28 +4,204 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Decide, antes da página aparecer, se a tela de carregamento vai rodar:
-         só na primeira visita da sessão e só para quem não pediu menos movimento.
-         Fica aqui, e não no main.js, para a tela não piscar em quem já viu. -->
+    <!-- Tela de carregamento: decide antes do primeiro quadro se ela roda.
+         Só na primeira visita (marca no localStorage), nunca para quem pediu
+         menos movimento, e só em navegador com Web Animations.
+         ?intro na URL força de novo; ?intro=0.25 ou ?intro=0.1 roda em câmera lenta. -->
     <script>
       (function () {
-        try {
-          var reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          if (reduzir || sessionStorage.getItem('principio-loader')) return;
-
-          var raiz = document.documentElement;
-          raiz.classList.add('carregando');
-
-          // Trava de segurança: se o JavaScript principal falhar, a página aparece em 6 s
-          // (a tela de carregamento normal dura ~2,75 s)
-          setTimeout(function () {
-            raiz.classList.remove('carregando');
-          }, 6000);
-        } catch (erro) {
-          // Navegador bloqueou o sessionStorage: segue sem tela de carregamento
+        var raiz = document.documentElement;
+        if (!window.matchMedia || !window.FontFace || !document.timeline || !raiz.animate) return;
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var pedido = /[?&]intro(?:=([^&]*))?(?:&|$)/.exec(location.search);
+        if (pedido) {
+          var velocidade = parseFloat(pedido[1]);
+          if (velocidade > 0 && velocidade < 1) raiz.style.setProperty('--intro-velocidade', velocidade);
+        } else {
+          try {
+            if (localStorage.getItem('principio-intro')) return;
+            localStorage.setItem('principio-intro', '1');
+          } catch (erro) {
+            // armazenamento bloqueado: não dá para saber se é a primeira visita, então roda
+          }
         }
+        raiz.classList.add('com-intro');
+
+        // Fonte dos símbolos: só < > { } ; / P, recortados da JetBrains Mono 500 (1,3 KB).
+        // Começa a ser lida aqui, bem antes do primeiro quadro, para o "<" já sair
+        // desenhado nele, sem esperar download e sem troca de fonte no meio.
+        var fonte = new FontFace('Intro Simbolos', 'url(data:font/woff;base64,d09GRgABAAAAAAVMAAoAAAAAB5QAAjYEAAAAAAAAAAAAAAAAAAAAAAAAAABPUy8yAAABZAAAAE4AAABgE9ZYKGNtYXAAAAHIAAAAUAAAAGgBVwHUZ2x5ZgAAAiwAAAGtAAAB/haEBzJoZWFkAAAA9AAAADYAAAA2JH6J22hoZWEAAAEsAAAAIAAAACQGbgFaaG10eAAAAbQAAAAUAAAAFAOTAaBsb2NhAAACGAAAABQAAAAUAiACl21heHAAAAFMAAAAGAAAACAADAApbmFtZQAAA9wAAAFYAAADXEu0aoNwb3N0AAAFNAAAABcAAAAg/2gAMwABAAAAAjYEVqXYyV8PPPUAAwPoAAAAANvSppoAAAAA5yNpvABE/2ACLAM+AAAABgACAAAAAAAAeJxjYGRgYP7z7woDA1MEgwuDDpMOAyMDKmAEAGr1A814nGNgZGBg4GTQYGBiAAFGBjQAAAVZADZ4nGNgYYpi/MLAysDA1MUUwcDA4A2hGeMYjBgdGBiYGBg4GWCAkQEJeDkxMDAcYFBgqGX+8+8KAwPzH0YdmBomNaZbDAwMCgysAAgfC2AAAAJYAFoAVACjAEQAUgBSAAAAUQBReJxFzL0NQGAYhdHjp1AoFAawgQGIGRS2ET3jGENvBmu8ki8St3mSU1zkKNAqZKmlBY0meac3msxWW8Qnwy/xxE1cccYRe/qg9i9XvfkrEyAAAAAAACMAQwBSAI0AyADIAOMA/3icXc+/btNQFAbwc4//RLHSITR2ZnzxtUN90+DbaztR5CEuquQoEq2MslaGorJENB26EzGn6gvUUlfmvgMDo5cOvAIvgBwUlQrBfPR9v+8AQg6APj5AC0yAy7YILMvs6Dql7bYIQnnAKM1/Hn0cjs6PVqs4TeMVPoTv0sn7sP5BVmk8nAAg3G1OyRccgAJtgPmuUHZtJg9CIYJtG717c/35OfW53bG5T0sS1d/wFac25zblAAQONzfYURJQAOZEkENy+qkuF8rXX/n2erK5QV1JwAV4bTMWRSGjVIogdF0WhkKY1Na7XUunMrAaDd0SwiTfh2+5aiCLl8uYoaH4+Wg46PXRULN0MlUNwnuDRW8mb/u88PdLOfMK5pVJpk2TknnFv+r8CROm/Ze3nrA/vE5PHoXpJM1UA/nLwXCUb1e40XIZuWioPB8tCo+VyVTLktJjhTeT5b5f8P6tnPW2vx7DGBs4hxbAlXTCMGLMdaRmHpO9zoum4TyrK3I//rButhB3muvz6uK/1JkjHVPT9YZldTVs1Bm5r6vHKNkbVxfV2bq5g9hqXv8GmkNmhwAAAHicnZLPTsJAEMZ/BTThIA9gPGw4qcFWOHhAL2BCIkHxX7xDWduaSpu2SHwNn8UjD+IT+Bym45KAIDEedvNl55vvm5kdoExCEatUBmZgsMUeM4MLVPgwuMgZnwaXqFlVg7fYta4M3ubQ8g3esarWm8EVTgrvnBMR80pCgIdPhqLBsRzFPT4aRRdNRpuEAQFjUhSXRIyJUFyTEPGExpX8FhMyfCISYe6LbkZMShMHB49AGBOG2LhEPOOscVn3Nvc92FjVLRqPCSEDEhrYNKhT55Qubbl/0z36kbu592XuA1p6DiSuFnz/7pfPPBCXjjDyid4R8UjGVBj5j3wzQgJctOhpRigmjBlJFUomrCX7gh6KPrFwF5V7Swo11EoPdWw5aqGyZd95NQNepLu8jyGhRKbmp/No7tviRnBGE7WyFymubGJMRootVYTYskkeDn069P6X9QXafYtjeJxjYGYAg/+pDEYMDAyMDGgAACWjAZsA)', { weight: '500', display: 'block' });
+        document.fonts.add(fonte);
+        fonte.load();
       })();
     </script>
+
+    <!-- Pré-carrega a Space Grotesk 600 (título e "princípio.web"): o download começa
+         junto com a página, não só depois do CSS. No build, o Vite troca o caminho
+         pelo arquivo final (o mesmo que o CSS usa, então ela baixa uma vez só). -->
+    <link rel="preload" href="/node_modules/@fontsource/space-grotesk/files/space-grotesk-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
+
+    <style>
+      /* =========================================================
+         TELA DE CARREGAMENTO
+         Inline no <head> para a camada já sair pronta no primeiro
+         quadro. Cores e fontes vêm do tokens.css; o valor depois da
+         vírgula é a reserva enquanto ele ainda não carregou.
+         A fonte dos símbolos ("Intro Simbolos") é criada no script
+         logo acima, já embutida, para estar pronta no primeiro quadro.
+         ========================================================= */
+
+      /* Sem html.com-intro (segunda visita, movimento reduzido ou sem JS) a camada não aparece */
+      .intro {
+        display: none;
+      }
+
+      html.com-intro .intro {
+        /* ---------- Ajustes ---------- */
+        --intro-fundo: var(--cor-carbono, #0E1111);
+        --intro-cor-grade: var(--cor-grade, #1A1F1F);
+        --intro-grade: var(--grade, 72px);               /* lado de cada quadrado da grade */
+        --intro-cor-simbolo: var(--cor-cinza, #9AA19E);  /* < { } ; e as setas do <P/> */
+        --intro-cor-barra: var(--cor-cinza, #9AA19E);    /* a / do <P/> (no logo do topo ela é lima) */
+        --intro-cor-clara: var(--cor-gelo, #F2F2EF);     /* o P e o "princípio" */
+        --intro-cor-web: var(--cor-lima, #C6F432);       /* o ".web": o único ponto de cor */
+        --intro-luz: rgb(242 242 239 / 0.035);           /* brilho da célula a cada batida */
+        --intro-tam: clamp(64px, 12vw, 140px);           /* tamanho dos símbolos */
+        --intro-tam-nome: calc(var(--intro-tam) * 0.33); /* tamanho do "princípio.web" */
+        --intro-fechado: 0.35em;   /* quanto o < e o /> se aproximam para formar o </> */
+        --intro-seguranca: 4s;     /* se o JavaScript falhar, a camada some sozinha depois disso */
+
+        position: fixed;
+        inset: 0;
+        z-index: 1000; /* acima de tudo, inclusive do botão flutuante */
+        display: grid;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        background-color: var(--intro-fundo);
+        background-image:
+          linear-gradient(var(--intro-cor-grade) 1px, transparent 1px),
+          linear-gradient(90deg, var(--intro-cor-grade) 1px, transparent 1px);
+        background-size: var(--intro-grade) var(--intro-grade);
+        background-position: center; /* um quadrado bem no meio da tela, onde caem os símbolos */
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        /* Rede de segurança: se o script quebrar, ela some sozinha */
+        animation: intro-seguranca 0.3s ease calc(var(--intro-seguranca) / var(--intro-velocidade, 1)) forwards;
+      }
+
+      @keyframes intro-seguranca {
+        to {
+          opacity: 0;
+          visibility: hidden;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html.com-intro .intro {
+          display: none;
+        }
+      }
+
+      /* Palco: tudo empilhado no centro da tela */
+      .intro__palco {
+        display: grid;
+        place-items: center;
+        color: var(--intro-cor-simbolo);
+        font: 500 var(--intro-tam) / 1 "Intro Simbolos", var(--fonte-mono, monospace);
+      }
+
+      .intro__palco > * {
+        grid-area: 1 / 1;
+      }
+
+      /* will-change: avisa o navegador que estes elementos vão se mexer, para ele
+         preparar uma camada própria e animar tudo no compositor (fluidez real) */
+      .intro__celula,
+      .intro__simbolo,
+      .intro__tag,
+      .intro__tag span,
+      .intro__nome {
+        will-change: transform, opacity;
+      }
+
+      /* A célula do centro, que acende a cada batida */
+      .intro__celula {
+        width: var(--intro-grade);
+        height: var(--intro-grade);
+        background-color: var(--intro-luz);
+        opacity: 0;
+      }
+
+      /* Cada símbolo só aparece quando o script mostra; o primeiro "<" já nasce na tela.
+         --x e --y são ajustes ópticos para o desenho cair no meio do quadrado. */
+      .intro__simbolo {
+        position: relative;
+        top: var(--y, 0);
+        left: var(--x, 0);
+        white-space: pre; /* mantém o espaço do "{ }" */
+        opacity: 0;
+      }
+
+      .intro__simbolo--primeiro {
+        opacity: 1;
+      }
+
+      /* O <P/> começa fechado, como </>: o P escondido no meio */
+      .intro__logo {
+        position: relative;
+      }
+
+      .intro__tag {
+        display: flex;
+        opacity: 0;
+      }
+
+      .intro__tag span {
+        display: inline-block;
+      }
+
+      .intro__abre {
+        transform: translateX(var(--intro-fechado));
+      }
+
+      .intro__fecha {
+        transform: translateX(calc(var(--intro-fechado) * -1));
+      }
+
+      .intro__p {
+        color: var(--intro-cor-clara);
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      .intro__barra {
+        color: var(--intro-cor-barra);
+      }
+
+      /* "princípio.web" centralizado embaixo do <P/> */
+      .intro__nome {
+        position: absolute;
+        top: 100%;
+        right: -50%;
+        left: -50%;
+        margin: calc(var(--intro-tam) * 0.38) 0 0; /* distância até o <P/> */
+        color: var(--intro-cor-clara);
+        font: 600 var(--intro-tam-nome) / 1 var(--fonte-titulo, "Space Grotesk", system-ui, sans-serif);
+        letter-spacing: -0.02em;
+        text-align: center;
+        opacity: 0;
+      }
+
+      .intro__web {
+        color: var(--intro-cor-web);
+      }
+
+      /* Palavras do título enquanto ele entra linha a linha (o script cria e desfaz) */
+      .intro-palavra {
+        display: inline-block;
+      }
+    </style>
 
     <title>Princípio Web: sites profissionais</title>
     <meta
@@ -51,12 +227,413 @@
 
   <body>
     <!-- ================= TELA DE CARREGAMENTO =================
-         Só aparece quando o <html> tem a classe "carregando" (decidido pelo
-         script no <head>). Quem anima é o src/js/loader.js. -->
-    <div class="loader" aria-hidden="true">
-      <p class="loader__simbolo">&lt;</p>
-      <p class="loader__nome">princípio<span class="destaque">.web</span></p>
+         Camada fixa por cima da página, que carrega normalmente por baixo.
+         Só aparece com html.com-intro (decidido no <head>); quem anima é o
+         script logo abaixo. aria-hidden: leitores de tela ignoram. -->
+    <div class="intro" aria-hidden="true">
+      <div class="intro__palco">
+        <span class="intro__celula"></span>
+        <span class="intro__simbolo intro__simbolo--primeiro" style="--y: -0.03em">&lt;</span>
+        <span class="intro__simbolo">{ }</span>
+        <span class="intro__simbolo" style="--x: 0.024em; --y: -0.16em">;</span>
+        <span class="intro__simbolo" style="--y: -0.03em">&lt;</span>
+        <div class="intro__logo">
+          <div class="intro__tag"><span class="intro__abre">&lt;</span><span class="intro__p">P</span><span class="intro__fecha"><span class="intro__barra">/</span>&gt;</span></div>
+          <p class="intro__nome">princípio<span class="intro__web">.web</span></p>
+        </div>
+      </div>
     </div>
+    <script>
+      /* =========================================================
+         TELA DE CARREGAMENTO: a animação
+         Fica aqui, inline, para começar já no primeiro quadro, sem
+         esperar nenhum arquivo baixar. Tudo usa a Web Animations API
+         (elemento.animate): o navegador roda essas animações fora da
+         linha principal, então o ritmo não engasga enquanto a página
+         carrega por baixo. Os tempos contam do primeiro quadro (0 ms).
+         ========================================================= */
+      (function () {
+        // ---------- Tempos (ms): mude aqui para ajustar ----------
+        var BATIDA = 150;            // de quanto em quanto tempo o símbolo troca (o metrônomo)
+        var POP = 90;                // duração do "pop" de cada símbolo novo...
+        var POP_ESCALA = 0.94;       // ...que nasce com 94% do tamanho
+        var POP_OPACIDADE = 0.6;     // ...e 60% de opacidade
+        var LUZ = 140;               // a célula do centro acende e apaga a cada batida
+        var TAG_MINIMO = 450;        // o </> entra aqui (ou na 1ª batida depois que o essencial carregar)
+        var ABRE = 260;              // o </> se abrindo em <P/>
+        var P_ATRASO = 50;           // o P espera o < e o /> abrirem espaço (senão encosta neles)
+        var P_SOBE = 8;              // px que o P sobe ao entrar
+        var P_DURACAO = 280;
+        var NOME_ATRASO = 60;        // o "princípio.web" entra 60 ms depois do P
+        var NOME_SOBE = 6;           // px
+        var NOME_DURACAO = 400;
+        var SEGURA = 240;            // logo na tela antes do corte (0,60 s → 0,84 s)
+        var CORTE = 230;             // o corte: a camada sai de baixo para cima (200–250)
+        var CORTE_SOBE = 24;         // px que o logo sobe junto com o corte
+        var PULAR = 150;             // saída rápida quando a pessoa clica, toca, rola ou tecla
+        var TETO = 2500;             // espera máxima pelo essencial; depois disso o logo forma assim mesmo
+        var ENTRADA_INICIO = 0;      // a abertura começa a entrar junto com o corte (o título aparece quando o logo sai)
+        var ENTRADA_INTERVALO = 50;  // entre uma linha e a próxima
+        var ENTRADA_DURACAO = 520;
+        var ENTRADA_SOBE = 12;       // px que cada linha sobe
+
+        // ---------- O essencial: o logo só forma quando isto estiver pronto ----------
+        var FONTES = ['600 1em "Space Grotesk"', '400 1em Inter', '600 1em Inter', '400 1em "JetBrains Mono"'];
+        var IMAGENS = '.abertura img';  // imagens do topo (hoje não há nenhuma)
+
+        // ---------- Curvas ----------
+        var ENTRA = 'cubic-bezier(0.16, 1, 0.3, 1)';       // entradas
+        var MOVE = 'cubic-bezier(0.65, 0, 0.35, 1)';       // movimentos que começam e terminam parados
+        var ENCAIXA = 'cubic-bezier(0.34, 1.56, 0.64, 1)'; // encaixes, com overshoot sutil
+
+        var raiz = document.documentElement;
+        var original = document.querySelector('.intro');
+        if (!original) return;
+
+        // principioIntro.fim: promessa que se cumpre quando a abertura termina de entrar.
+        // principioIntro.rever(): roda de novo sem recarregar (no console; 0.25 = câmera lenta).
+        var molde = original.cloneNode(true);
+        var api = (window.principioIntro = { fim: Promise.resolve(), rever: rever });
+        var ocupado = false;
+
+        if (raiz.classList.contains('com-intro')) rodar(original);
+        else original.remove(); // segunda visita ou movimento reduzido: a camada nem fica no DOM
+
+        function rever(velocidade) {
+          if (ocupado) return; // ainda rodando
+          if (velocidade > 0 && velocidade < 1) raiz.style.setProperty('--intro-velocidade', velocidade);
+          else raiz.style.removeProperty('--intro-velocidade');
+          var camada = molde.cloneNode(true);
+          document.body.insertBefore(camada, document.body.firstChild);
+          raiz.classList.add('com-intro');
+          rodar(camada);
+        }
+
+        function rodar(camada) {
+          ocupado = true;
+          // ?intro=0.25 deixa tudo 4x mais lento (câmera lenta para revisar)
+          var lento = 1 / (parseFloat(raiz.style.getPropertyValue('--intro-velocidade')) || 1);
+          function ms(valor) {
+            return valor * lento;
+          }
+
+          var palco = camada.querySelector('.intro__palco');
+          var celula = camada.querySelector('.intro__celula');
+          var simbolos = camada.querySelectorAll('.intro__simbolo'); // <, { }, ;, < (o da repetição)
+          var tag = camada.querySelector('.intro__tag');
+          var nome = camada.querySelector('.intro__nome');
+          var pecas = {
+            abre: tag.querySelector('.intro__abre'),
+            p: tag.querySelector('.intro__p'),
+            fecha: tag.querySelector('.intro__fecha'),
+            barra: tag.querySelector('.intro__barra'),
+          };
+
+          var animacoes = []; // tudo o que foi agendado (para pausar ou cancelar ao pular)
+          var entrada = []; // as animações da abertura, que ficam fora da camada
+          var desfazer = []; // o que voltar ao normal no fim
+          var inicio = null; // o primeiro quadro, na linha do tempo do documento
+          var estado = 'rodando'; // → 'pulando' → 'fim'
+          var decidido = false;
+          var inicioDoCorte = Infinity;
+          var avisarFim;
+          api.fim = new Promise(function (cumprir) {
+            avisarFim = cumprir;
+          });
+
+          // Agenda uma animação. "delay" conta do primeiro quadro (o startTime em comum).
+          function anima(el, quadros, tempo) {
+            var a = el.animate(quadros, tempo);
+            if (inicio !== null) a.startTime = inicio;
+            animacoes.push(a);
+            return a;
+          }
+
+          // Chama "fazer" no tempo t, no mesmo relógio das animações
+          // (por isso a câmera lenta do DevTools também atrasa isto)
+          function quando(t, fazer) {
+            var a = new Animation(new KeyframeEffect(null, null, { duration: t }), document.timeline);
+            a.onfinish = fazer;
+            a.play();
+            if (inicio !== null) a.startTime = inicio;
+            animacoes.push(a);
+          }
+
+          // ---------- 1. O metrônomo ----------
+          // 0 ms: o "<" já está na tela (CSS). Depois: { } → ; → e, se o essencial
+          // ainda não chegou, a repetição < { } ; até ele chegar (ou até o teto).
+          // Cada elemento tem UMA animação com todas as suas aparições: assim o
+          // navegador consegue rodá-las no compositor (várias animações da mesma
+          // propriedade no mesmo elemento o obrigam a voltar para a linha principal).
+          var ultimaTag = Math.floor((TETO - BATIDA) / BATIDA) * BATIDA; // 2,25 s: o </> mais tardio
+          var total = ms(ultimaTag + 3 * BATIDA); // até onde a repetição fica agendada
+          var ordem = [simbolos[1], simbolos[2], simbolos[3]];
+          var vezes = [[], [], []]; // quando cada um desses três aparece
+          var todas = [];
+          for (var t = BATIDA, i = 0; t <= ultimaTag + BATIDA; t += BATIDA, i++) {
+            vezes[i % 3].push(ms(t));
+            todas.push(ms(t));
+          }
+
+          // O primeiro "<" fica até a primeira troca e some (troca seca)
+          var primeira = anima(simbolos[0], [
+            { offset: 0, opacity: 1 },
+            { offset: ms(BATIDA) / total, opacity: 1 },
+            { offset: ms(BATIDA) / total, opacity: 0 },
+            { offset: 1, opacity: 0 },
+          ], { duration: total, fill: 'forwards' });
+          var loop = ordem.map(function (el, n) {
+            return anima(el, quadrosSimbolo(vezes[n]), { duration: total });
+          });
+          var luz = anima(celula, quadrosCelula(todas), { duration: total });
+
+          // Quadros de um símbolo que aparece nos tempos da lista: surge com o pop,
+          // fica até a troca seguinte e some na hora (dois quadros no mesmo ponto = salto seco)
+          function quadrosSimbolo(lista) {
+            var q = [{ offset: 0, opacity: 0, transform: 'none' }];
+            lista.forEach(function (de) {
+              var ate = de + ms(BATIDA);
+              q.push({ offset: de / total, opacity: 0, transform: 'none' });
+              q.push({ offset: de / total, opacity: POP_OPACIDADE, transform: 'scale(' + POP_ESCALA + ')', easing: ENTRA });
+              q.push({ offset: (de + ms(POP)) / total, opacity: 1, transform: 'none' });
+              q.push({ offset: ate / total, opacity: 1, transform: 'none' });
+              q.push({ offset: ate / total, opacity: 0, transform: 'none' });
+            });
+            q.push({ offset: 1, opacity: 0, transform: 'none' });
+            return q;
+          }
+
+          // A célula atrás do símbolo acende de leve e apaga nos tempos da lista
+          function quadrosCelula(lista) {
+            var q = [{ offset: 0, opacity: 0 }];
+            lista.forEach(function (de) {
+              if (de + ms(LUZ) > total) return;
+              q.push({ offset: de / total, opacity: 0 });
+              q.push({ offset: de / total, opacity: 1, easing: MOVE });
+              q.push({ offset: (de + ms(LUZ)) / total, opacity: 0 });
+            });
+            q.push({ offset: 1, opacity: 0 });
+            return q;
+          }
+
+          essencialPronto().then(decidir);
+          quando(ms(ultimaTag - 100), decidir); // teto: forma o logo mesmo sem tudo pronto
+
+          // ---------- Pular: clique, toque, rolagem ou qualquer tecla ----------
+          var gatilhos = ['pointerdown', 'touchstart', 'wheel', 'keydown'];
+          gatilhos.forEach(function (tipo) {
+            addEventListener(tipo, pular, { capture: true, passive: true });
+          });
+
+          primeira.ready.then(function () {
+            inicio = primeira.startTime;
+          });
+
+          function decidir() {
+            if (decidido || estado !== 'rodando') return;
+            decidido = true;
+            primeira.ready.then(agendarFinal);
+          }
+
+          // ---------- 2. O </> na próxima batida, o logo, o corte e a abertura ----------
+          function agendarFinal() {
+            if (estado !== 'rodando') return;
+            inicio = primeira.startTime;
+            var passo = ms(BATIDA);
+            var agora = document.timeline.currentTime - inicio;
+            // próxima batida com folga de 2 quadros, para o navegador receber o aviso a tempo
+            var tTag = Math.max(ms(TAG_MINIMO), Math.ceil((agora + 34) / passo) * passo);
+            var tLogo = tTag + passo;
+            inicioDoCorte = tLogo + ms(SEGURA);
+
+            // a repetição para onde o </> entra (a célula ganha as batidas do </> e do logo)
+            loop.forEach(function (a, n) {
+              a.effect.setKeyframes(quadrosSimbolo(vezes[n].filter(function (t) { return t < tTag; })));
+            });
+            luz.effect.setKeyframes(quadrosCelula(todas.filter(function (t) { return t < tTag; }).concat(tTag, tLogo)));
+
+            // </>: o < e o /> que vão formar o logo, ainda juntos (o P escondido no meio)
+            anima(tag, [
+              { opacity: POP_OPACIDADE, transform: 'scale(' + POP_ESCALA + ')' },
+              { opacity: 1, transform: 'none' },
+            ], { delay: tTag, duration: ms(POP), easing: ENTRA, fill: 'forwards' });
+
+            // 0,60 s: o </> se abre. < para a esquerda, /> para a direita, o P sobe para o meio
+            // e a barra estica como no logo do topo. Um quadro só com o fim definido: o
+            // começo é o próprio CSS (o </> fechado).
+            var abrir = { delay: tLogo, duration: ms(ABRE), easing: ENCAIXA, fill: 'forwards' };
+            anima(pecas.abre, { transform: 'none' }, abrir);
+            anima(pecas.fecha, { transform: 'none' }, abrir);
+            anima(pecas.barra, { transform: 'scaleY(1.18) skewX(-8deg)' }, abrir);
+            var tP = tLogo + ms(P_ATRASO);
+            anima(pecas.p, [
+              { opacity: 0, transform: 'translateY(' + P_SOBE + 'px)' },
+              { opacity: 1, transform: 'none' },
+            ], { delay: tP, duration: ms(P_DURACAO), easing: ENTRA, fill: 'forwards' });
+            anima(nome, [
+              { opacity: 0, transform: 'translateY(' + NOME_SOBE + 'px)' },
+              { opacity: 1, transform: 'none' },
+            ], { delay: tP + ms(NOME_ATRASO), duration: ms(NOME_DURACAO), easing: ENTRA, fill: 'forwards' });
+
+            // 0,84 s: o corte. A camada é recortada de baixo para cima (clip-path)
+            // e o logo sobe um pouco junto, para a saída não ficar dura. O clip-path é a
+            // única parte que o navegador roda na linha principal, mas a essa altura a
+            // página já terminou de carregar e ela está livre.
+            var cortar = { delay: inicioDoCorte, duration: ms(CORTE), easing: MOVE, fill: 'forwards' };
+            var corte = anima(camada, [{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 100% 0)' }], cortar);
+            anima(palco, [{ transform: 'none' }, { transform: 'translateY(-' + CORTE_SOBE + 'px)' }], cortar);
+            corte.finished.then(terminar, function () {});
+
+            // logo em seguida, a abertura entra linha a linha
+            if (document.readyState !== 'loading') agendarEntrada(inicioDoCorte);
+          }
+
+          // Itens com data-intro-entrada sobem 12 px, um depois do outro.
+          // ="linhas": o texto entra linha a linha. ="ultimo": entra por último (os botões do WhatsApp).
+          function agendarEntrada(tCorte) {
+            var grupos = [];
+            var finais = [];
+            document.querySelectorAll('[data-intro-entrada]').forEach(function (el) {
+              if (!naTela(el)) return;
+              var tipo = el.getAttribute('data-intro-entrada');
+              if (tipo === 'linhas') grupos = grupos.concat(linhas(el));
+              else if (tipo === 'ultimo') finais.push(el);
+              else grupos.push([el]);
+            });
+            if (finais.length) grupos.push(finais);
+
+            grupos.forEach(function (grupo, n) {
+              grupo.forEach(function (el) {
+                entrada.push(anima(el, [
+                  { opacity: 0, transform: 'translateY(' + ENTRADA_SOBE + 'px)' },
+                  { opacity: 1, transform: 'none' },
+                ], {
+                  delay: tCorte + ms(ENTRADA_INICIO + n * ENTRADA_INTERVALO),
+                  duration: ms(ENTRADA_DURACAO),
+                  easing: ENTRA,
+                  fill: 'backwards', // fica escondido (ainda debaixo da camada) até a vez dele
+                }));
+              });
+            });
+          }
+
+          // Separa um título em linhas: cada palavra vira um <span> (inline-block, para
+          // poder subir) e as palavras são agrupadas pela altura em que caíram.
+          // No fim, os <span> são desfeitos e o título volta a ser texto puro.
+          function linhas(el) {
+            var palavras = [];
+            var textos = [];
+            var andar = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+            while (andar.nextNode()) textos.push(andar.currentNode);
+            textos.forEach(function (no) {
+              var pedacos = document.createDocumentFragment();
+              no.nodeValue.split(/(\s+)/).forEach(function (pedaco) {
+                if (!pedaco) return;
+                if (/^\s+$/.test(pedaco)) {
+                  pedacos.appendChild(document.createTextNode(pedaco));
+                  return;
+                }
+                var palavra = document.createElement('span');
+                palavra.className = 'intro-palavra';
+                palavra.textContent = pedaco;
+                pedacos.appendChild(palavra);
+                palavras.push(palavra);
+              });
+              no.parentNode.replaceChild(pedacos, no);
+            });
+            desfazer.push(function () {
+              palavras.forEach(function (palavra) {
+                palavra.replaceWith(palavra.firstChild);
+              });
+              el.normalize();
+            });
+
+            var grupos = [];
+            var topo = null;
+            palavras.forEach(function (palavra) {
+              var r = palavra.getBoundingClientRect();
+              if (topo === null || r.top > topo + r.height / 2) {
+                grupos.push([]);
+                topo = r.top;
+              }
+              grupos[grupos.length - 1].push(palavra);
+            });
+            return grupos;
+          }
+
+          function naTela(el) {
+            var r = el.getBoundingClientRect();
+            return r.width > 0 && r.bottom > 0 && r.top < innerHeight;
+          }
+
+          // Pronto = HTML lido + fontes da página carregadas + imagens do topo decodificadas.
+          // Se algo falhar, conta como pronto: a animação nunca fica esperando para sempre.
+          function essencialPronto() {
+            return new Promise(function (pronto) {
+              function verificar() {
+                // dois quadros: o layout da página já pediu as fontes que usa
+                requestAnimationFrame(function () {
+                  requestAnimationFrame(function () {
+                    var esperas = [];
+                    if (document.fonts) {
+                      FONTES.forEach(function (fonte) {
+                        esperas.push(document.fonts.load(fonte));
+                      });
+                      esperas.push(document.fonts.ready);
+                    }
+                    document.querySelectorAll(IMAGENS).forEach(function (img) {
+                      if (img.decode) esperas.push(img.decode());
+                    });
+                    Promise.all(esperas.map(function (p) { return p.catch(function () {}); })).then(pronto);
+                  });
+                });
+              }
+              if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', verificar, { once: true });
+              else verificar();
+            });
+          }
+
+          function pular() {
+            if (estado !== 'rodando') return;
+            if (inicio !== null && document.timeline.currentTime - inicio >= inicioDoCorte) return; // o corte já começou
+            estado = 'pulando';
+            // congela o que está na camada e cancela o resto (a abertura volta ao normal por baixo)
+            animacoes.forEach(function (a) {
+              var alvo = a.effect && a.effect.target;
+              if (alvo && camada.contains(alvo)) a.pause();
+              else a.cancel();
+            });
+            camada
+              .animate([{ opacity: 1 }, { opacity: 0 }], { duration: ms(PULAR), easing: ENTRA, fill: 'forwards' })
+              .finished.then(terminar);
+          }
+
+          // ---------- 3. Fim: a camada sai do DOM ----------
+          function terminar() {
+            if (estado === 'fim') return;
+            estado = 'fim';
+            camada.remove();
+            raiz.classList.remove('com-intro');
+            gatilhos.forEach(function (tipo) {
+              removeEventListener(tipo, pular, { capture: true });
+            });
+            animacoes.forEach(function (a) {
+              if (!a.effect || !a.effect.target) a.cancel(); // relógios que sobraram
+            });
+            // espera a abertura terminar de entrar (as canceladas ao pular não contam)
+            var andando = entrada.filter(function (a) { return a.playState !== 'idle'; });
+            Promise.all(andando.map(function (a) { return a.finished; }))
+              .catch(function () {})
+              .then(function () {
+                desfazer.forEach(function (volta) { volta(); });
+                ocupado = false;
+                avisarFim();
+                document.dispatchEvent(new Event('intro:fim'));
+              });
+          }
+        }
+      })();
+    </script>
 
     <!-- ================= CABEÇALHO ================= -->
     <header class="topo">
@@ -76,15 +653,18 @@
     </header>
 
     <main>
-      <!-- ================= 1. ABERTURA ================= -->
+      <!-- ================= 1. ABERTURA =================
+           data-intro-entrada: entra subindo logo depois da tela de carregamento,
+           na ordem do HTML. ="linhas": o título entra linha a linha.
+           ="ultimo": entra por último (os botões do WhatsApp). -->
       <section class="abertura" id="inicio" aria-labelledby="abertura-titulo">
-        <p class="pilula mono"><span aria-hidden="true">●</span> agenda aberta</p>
-        <p class="rotulo mono"><span aria-hidden="true">// </span>sites e landing pages</p>
-        <h1 id="abertura-titulo">Seu trabalho merece um endereço <span class="destaque">à altura.</span></h1>
-        <p class="abertura__subtitulo">Sites profissionais para advogados, psicólogos e profissionais liberais.</p>
+        <p class="pilula mono" data-intro-entrada><span aria-hidden="true">●</span> agenda aberta</p>
+        <p class="rotulo mono" data-intro-entrada><span aria-hidden="true">// </span>sites e landing pages</p>
+        <h1 id="abertura-titulo" data-intro-entrada="linhas">Seu trabalho merece um endereço <span class="destaque">à altura.</span></h1>
+        <p class="abertura__subtitulo" data-intro-entrada>Sites profissionais para advogados, psicólogos e profissionais liberais.</p>
         <div class="abertura__botoes">
-          <a class="botao" href="https://wa.me/[NÚMERO]" target="_blank" rel="noopener">Chamar no WhatsApp <span aria-hidden="true">→</span></a>
-          <a class="botao botao--secundario" href="#portfolio">Ver projetos</a>
+          <a class="botao" href="https://wa.me/[NÚMERO]" target="_blank" rel="noopener" data-intro-entrada="ultimo">Chamar no WhatsApp <span aria-hidden="true">→</span></a>
+          <a class="botao botao--secundario" href="#portfolio" data-intro-entrada>Ver projetos</a>
         </div>
       </section>
 
@@ -266,8 +846,8 @@
       <p><small>© 2026</small></p>
     </footer>
 
-    <!-- Botão flutuante do WhatsApp: fica fixo no canto a partir da etapa de componentes -->
-    <a class="whatsapp-flutuante" href="https://wa.me/[NÚMERO]" target="_blank" rel="noopener" aria-label="Chamar no WhatsApp">
+    <!-- Botão flutuante do WhatsApp: fica fixo no canto. Entra junto com o botão da abertura. -->
+    <a class="whatsapp-flutuante" href="https://wa.me/[NÚMERO]" target="_blank" rel="noopener" aria-label="Chamar no WhatsApp" data-intro-entrada="ultimo">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
       </svg>

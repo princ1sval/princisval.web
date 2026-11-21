@@ -60,6 +60,11 @@ body {
   /* Grade de fundo (definida no tokens.css) */
   background-image: var(--fundo-grade);
   background-size: var(--grade) var(--grade);
+  /* Um quadrado da grade fica bem no meio da primeira tela, igual à tela
+     de carregamento: no corte, a grade continua no lugar e só o conteúdo muda.
+     svh = altura da tela com a barra do navegador do celular aberta. */
+  background-position: center calc(50vh - var(--grade) / 2);
+  background-position: center calc(50svh - var(--grade) / 2);
   color: var(--cor-gelo);
   font-family: var(--fonte-texto);
   font-size: var(--texto-base);
