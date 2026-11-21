@@ -23,12 +23,30 @@ gsap.registerPlugin(ScrollTrigger)
 
 // ---------- Ajustes: mude aqui ----------
 const DURACAO = 1.2 // quanto se rola com a cena presa, em alturas de tela (1.2 = 120%)
-const SUAVE = 0.6 // segundos que a animação leva para alcançar a rolagem (0 = colada nela)
+const SUAVE = 1.2 // segundos que a animação leva para alcançar a rolagem (0 = colada nela; mais = mais amortecida)
+const BIG_BANG = 2.4 // segundos que o big bang leva para tocar inteiro (junta, bolinha e explosão)
+const BIG_BANG_VOLTA = 1.4 // segundos para a esfera se refazer quando a pessoa volta ao topo
+const BIG_BANG_GATILHO = 40 // px de rolagem que disparam o big bang
 const TITULO_ESCALA = 0.55 // tamanho final do título
 const TITULO_TOPO = 0.1 // onde o título termina: fração da altura da tela, a partir do topo
 const PRINTS_ESCALA_INICIAL = 0.35 // os prints começam pequenos, "lá longe"
 const PRINTS_DESCE = 140 // px: e um pouco mais para baixo
 const PRINTS_ABRE = 6 // % que os prints laterais se afastam do centro ao chegar
+
+// Big bang da esfera: NÃO segue a rolagem px a px (aí a roda do mouse
+// "picota" a animação). A primeira rolada dispara e ele toca inteiro, no
+// tempo dele, seja a rolada rápida ou devagar. Voltando ao topo, a esfera
+// se refaz. O GSAP anima o número esfera.explosao (0 → 1); o
+// ascii-sphere.js desenha cada fase a partir dele.
+// Chamado dentro do gsap.matchMedia: com movimento reduzido, nem liga.
+function ligarBigBang() {
+  ScrollTrigger.create({
+    start: BIG_BANG_GATILHO,
+    end: 'max',
+    onEnter: () => gsap.to(esfera, { explosao: 1, duration: BIG_BANG, ease: 'none', overwrite: true }),
+    onLeaveBack: () => gsap.to(esfera, { explosao: 0, duration: BIG_BANG_VOLTA, ease: 'power2.inOut', overwrite: true }),
+  })
+}
 
 /** Liga a rolagem com profundidade. */
 export function iniciarProfundidade() {
@@ -95,9 +113,8 @@ export function iniciarProfundidade() {
       0,
     )
 
-    // 3. Big bang: a esfera se junta no ponteiro e explode pela tela.
-    //    O GSAP anima o número esfera.explosao (0 → 1); o ascii-sphere.js desenha.
-    linha.to(esfera, { explosao: 1, duration: 1 }, 0)
+    // 3. Big bang: toca no tempo dele (ver ligarBigBang, lá embaixo)
+    ligarBigBang()
 
     // 4. Os prints chegam de longe, por trás do título
     linha.fromTo(
@@ -118,12 +135,8 @@ export function iniciarProfundidade() {
 
   // ---------- Celular e tablet ----------
   telas.add('(max-width: 63.99rem) and (prefers-reduced-motion: no-preference)', () => {
-    // Big bang no celular: acontece enquanto a abertura sobe e sai da tela
-    gsap.to(esfera, {
-      explosao: 1,
-      ease: 'none',
-      scrollTrigger: { trigger: cena, start: 0, end: () => window.innerHeight * 0.9, scrub: SUAVE },
-    })
+    // Big bang no celular: igual ao computador, toca no tempo dele
+    ligarBigBang()
 
     gsap.fromTo(
       palco,
