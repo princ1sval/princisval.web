@@ -66,7 +66,7 @@ export function iniciarEsfera() {
   let cx = 0 // centro e raio da esfera, em px dentro do canvas
   let cy = 0
   let raio = 0
-  let escala = 1 // escala do site (base.css: 90% no computador), para os caracteres acompanharem
+  let escala = 1 // escala do site (base.css: 80% no computador), para os caracteres acompanharem
   let dpr = 1
   let celular = false
   let pontos = []

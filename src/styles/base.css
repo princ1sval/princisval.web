@@ -24,13 +24,13 @@ html {
   text-size-adjust: 100%;
 }
 
-/* Escala do site no computador: 90% deixa tudo igual ao zoom de 90% do
+/* Escala do site no computador: 80% deixa tudo igual ao zoom de 80% do
    navegador. Funciona porque textos, espaços e larguras estão em rem
    (1rem = o font-size daqui). No celular fica 100%, para o texto e os
    botões não ficarem pequenos demais. Para mudar a escala, mude só aqui. */
 @media (min-width: 64rem) {
   html {
-    font-size: 90%;
+    font-size: 80%;
   }
 }
 

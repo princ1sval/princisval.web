@@ -47,7 +47,7 @@
   --espaco-9: 6rem;     /*  96 px */
   --espaco-10: 8rem;    /* 128 px */
 
-  /* Medidas em rem acompanham a escala do site (base.css: 90% no computador).
+  /* Medidas em rem acompanham a escala do site (base.css: 80% no computador).
      Ficam em px só bordas, raios e o alvo mínimo de toque. */
 
   /* ---------- Raios (cantos arredondados) ---------- */
