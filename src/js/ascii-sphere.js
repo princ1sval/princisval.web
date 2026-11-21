@@ -263,7 +263,7 @@ export function iniciarEsfera() {
     new ResizeObserver(() => medir()).observe(secao)
 
     if (parada) {
-      canvas.classList.add('abertura__esfera--ativa')
+      canvas.classList.add('abertura__esfera--ativa', 'abertura__esfera--pronta')
       return
     }
 
@@ -289,7 +289,11 @@ export function iniciarEsfera() {
     })
 
     // Aparece junto com a abertura (depois do corte da tela de carregamento)
-    introCortou().then(() => canvas.classList.add('abertura__esfera--ativa'))
+    introCortou().then(() => {
+      canvas.classList.add('abertura__esfera--ativa')
+      // depois do esmaecer de entrada, tira a transição (a rolagem controla a opacidade)
+      setTimeout(() => canvas.classList.add('abertura__esfera--pronta'), 1300)
+    })
     ligar()
   })
 

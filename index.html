@@ -686,6 +686,10 @@
     </header>
 
     <main>
+      <!-- Cena: a abertura e os prints juntos. No computador, o depth-scroll.js
+           prende a cena na tela ao rolar: o título encolhe e sobe e os prints
+           se aproximam por trás dele. -->
+      <div class="cena">
       <!-- ================= 1. ABERTURA =================
            data-intro-entrada: entra subindo logo depois da tela de carregamento,
            na ordem do HTML. ="linhas": o texto entra linha a linha.
@@ -705,8 +709,8 @@
       </section>
 
       <!-- ================= 2. PROFUNDIDADE =================
-           Bloco decorativo: na etapa de efeitos, o título da abertura encolhe
-           ao rolar e estes prints aparecem por trás. Não traz conteúdo novo
+           Bloco decorativo: o título da abertura encolhe ao rolar e estes
+           prints aparecem por trás (src/js/depth-scroll.js). Não traz conteúdo novo
            (os projetos estão no portfólio), por isso fica escondido dos
            leitores de tela com aria-hidden. -->
       <div class="profundidade" aria-hidden="true">
@@ -723,6 +727,8 @@
           <p class="print__tela mono">[PRINT PROJETO 2]</p>
         </div>
       </div>
+      </div>
+      <!-- fim da cena -->
 
       <!-- ================= 3. PORTFÓLIO ================= -->
       <section class="portfolio" id="portfolio" aria-labelledby="portfolio-titulo">

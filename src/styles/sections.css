@@ -12,13 +12,15 @@
 /* ---------- Estrutura comum ---------- */
 
 /* Conteúdo centralizado em até 1200 px (ver --recuo-lateral no tokens.css) */
+/* "main section" (e não "main > section") pega também a abertura,
+   que fica dentro da .cena */
 .topo,
-main > section,
+main section,
 .rodape {
   padding-inline: var(--recuo-lateral);
 }
 
-main > section {
+main section {
   padding-block: var(--espaco-8);
   border-bottom: 1px solid var(--cor-grade);
   /* Carbono liso cobre a grade do fundo */
@@ -50,7 +52,7 @@ main > section:last-child {
 }
 
 @media (min-width: 64rem) {
-  main > section {
+  main section {
     padding-block: var(--espaco-9);
   }
 }
@@ -113,9 +115,16 @@ main > section:last-child {
 
 /* ---------- 1. Abertura ---------- */
 
+/* A cena (abertura + prints) é a "pilha" de camadas, de trás para a frente:
+   esfera (0) → prints (1) → texto da abertura (2). Assim os prints
+   cobrem a esfera, mas ficam atrás do título. */
+.cena {
+  position: relative;
+  isolation: isolate;
+}
+
 .abertura {
   position: relative; /* referência para a esfera ao fundo */
-  isolation: isolate; /* a esfera (z-index -1) fica atrás do texto da abertura */
   display: flex;
   flex-direction: column;
   align-items: flex-start; /* no celular, tudo alinhado à esquerda */
@@ -132,7 +141,7 @@ main > section:last-child {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: -1;
+  z-index: 0;
   width: 100%;
   height: 100%;
   max-width: none;
@@ -149,8 +158,21 @@ main > section:last-child {
   z-index: 1;
 }
 
+/* --recuo vai de 0 a 1 durante a rolagem com profundidade (depth-scroll.js):
+   a esfera vai sumindo enquanto os prints chegam */
 .abertura__esfera--ativa {
-  opacity: 1;
+  opacity: calc(1 - var(--recuo, 0) * 0.8);
+}
+
+/* Depois de aparecer, sem transição: assim a esfera acompanha a rolagem na hora */
+.abertura__esfera--pronta {
+  transition: none;
+}
+
+/* O texto da abertura fica na frente da esfera e dos prints */
+.abertura > :not(.abertura__esfera) {
+  position: relative;
+  z-index: 2;
 }
 
 .abertura h1 {
@@ -191,6 +213,7 @@ main > section:last-child {
    composição inteira encolhe junto com a tela. */
 .profundidade {
   position: relative;
+  z-index: 1; /* na frente da esfera, atrás do texto da abertura */
   width: min(62.5rem, 100% - 2 * var(--margem-lateral)); /* até 1000 px */
   aspect-ratio: 4 / 3;
   margin: var(--espaco-8) auto;
@@ -230,6 +253,28 @@ main > section:last-child {
     aspect-ratio: 2 / 1;
     margin-block: var(--espaco-9);
   }
+}
+
+/* Cena animada (computador, com depth-scroll.js): a cena ocupa a tela
+   inteira e os prints ficam no meio dela, por trás do título.
+   Sem JavaScript ou com movimento reduzido, os prints ficam embaixo
+   da abertura, como antes. */
+.cena--animada {
+  height: 100vh;
+  height: 100svh;
+}
+
+.cena--animada .abertura {
+  border-bottom: 0;
+}
+
+.cena--animada .profundidade {
+  position: absolute;
+  top: 56%;
+  left: 50%;
+  width: min(62.5rem, 100% - 2 * var(--margem-lateral), 120svh); /* em telas baixas, encolhe para caber */
+  margin: 0;
+  /* a posição no meio (-50%) fica com o GSAP, junto com a escala */
 }
 
 /* ---------- 3. Portfólio ---------- */

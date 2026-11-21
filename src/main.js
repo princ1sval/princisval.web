@@ -26,9 +26,13 @@ import './styles/sections.css' // estilos de cada seção
 //    o corte dela com introCortou(), do ./js/loader.js.
 import { iniciarHero } from './js/hero.js'
 import { iniciarEsfera } from './js/ascii-sphere.js'
+import { iniciarProfundidade } from './js/depth-scroll.js'
 
 // 2. Título acendendo letra por letra (começa junto com o corte da tela)
 iniciarHero()
 
 // 3. Esfera de caracteres ao fundo da abertura (aparece junto com o corte)
 iniciarEsfera()
+
+// 4. Rolagem com profundidade: o título encolhe e os prints se aproximam
+iniciarProfundidade()
