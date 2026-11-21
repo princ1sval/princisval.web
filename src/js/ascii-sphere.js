@@ -1,26 +1,40 @@
 // =========================================================
-// Abertura: a esfera de caracteres
-// Um <canvas> atrás do título com caracteres de "código"
-// (< > / { } ; 0 1 ...) espalhados numa esfera que gira
-// devagar, em tons próximos da grade. Perto do cursor eles
-// se agitam, trocam de símbolo e acendem em lima.
-// No celular: menos caracteres, uma "luz" que passeia sozinha
-// e, ao tocar, a luz vai para onde o dedo tocou.
+// A esfera de caracteres (e o big bang)
+// Um <canvas> fixo atrás da página inteira. No topo, ele desenha
+// uma esfera de caracteres de "código" (< > / { } ; 0 1 ...)
+// girando devagar atrás do título, em tons próximos da grade.
+// Perto do cursor eles se agitam, trocam de símbolo e acendem
+// em lima. No celular, uma "luz" passeia sozinha e o toque leva
+// a luz para onde o dedo tocou.
+//
+// Big bang: o depth-scroll.js leva esfera.explosao de 0 a 1
+// conforme a pessoa rola. Nesse caminho os caracteres:
+//   0 → JUNTA: saem da esfera e se juntam no ponteiro do mouse
+//   JUNTA → ESTOURA: viram uma bolinha apertada que pulsa, em lima
+//   ESTOURA → 1: explodem e se espalham pela tela, apagando
+// Em 1, ficam espalhados como um fundo discreto do resto do site
+// (as seções de fundo liso cobrem; as de grade deixam ver).
+// Rolou para cima, tudo volta.
 //
 // Cuidados de desempenho:
 // - cada símbolo é desenhado UMA vez num "atlas" (uma folha
 //   com todos os símbolos em todas as cores); a cada quadro
 //   só copiamos pedaços dele (drawImage), que é bem rápido
 // - no máximo FPS quadros por segundo
-// - para quando a abertura sai da tela ou a aba fica escondida
-// - com movimento reduzido: desenha a esfera parada, uma vez
+// - depois da explosão, só redesenha quando algo muda (o cursor
+//   passou, a rolagem voltou): parado, o fundo não gasta nada
+// - para com a aba escondida
+// - com movimento reduzido: esfera parada, sem explosão
 // =========================================================
 
 import { introCortou } from './loader.js'
 
+// Estado compartilhado: o depth-scroll.js anima esfera.explosao (0 → 1)
+export const esfera = { explosao: 0 }
+
 // ---------- Ajustes: mude aqui ----------
 const CARACTERES = ['<', '>', '/', '{', '}', ';', '0', '1', '+', '=', '*', ':', '.']
-const PONTOS = 1600 // quantos caracteres na esfera (computador)
+const PONTOS = 1600 // quantos caracteres (computador)
 const PONTOS_CELULAR = 750 // no celular
 const FPS = 40 // limite de quadros por segundo (computador)
 const FPS_CELULAR = 30
@@ -32,8 +46,8 @@ const SEGUE_MOUSE = 0.18 // o quanto a esfera vira na direção do cursor (radia
 const PERSPECTIVA = 3.2 // maior = mais "chapada"; menor = mais profundidade
 
 // Posição e tamanho, em frações da área da abertura
-const ESFERA = { centroY: 0.56, raio: 0.44 } // computador: atrás do título, metade da altura
-const ESFERA_CELULAR = { centroY: 0.48, raio: 0.62 } // celular: um pouco maior que a largura, as bordas cortadas
+const ESFERA = { centroY: 0.56, raio: 0.44 } // computador: atrás do título
+const ESFERA_CELULAR = { centroY: 0.48, raio: 0.62 } // celular: um pouco maior que a largura
 
 // A luz do cursor
 const ALCANCE = 130 // raio da área que acende, em px
@@ -43,6 +57,13 @@ const TREME = 3 // px que o caractere aceso treme
 const TROCA = 0.22 // chance (por quadro) de um caractere aceso trocar de símbolo
 const TOQUE_DURA = 1600 // ms que a luz fica onde o dedo tocou, antes de voltar a passear
 
+// Big bang (frações do caminho de esfera.explosao, que vai de 0 a 1)
+const JUNTA = 0.42 // até aqui, os caracteres se juntam no ponteiro
+const ESTOURA = 0.55 // daqui em diante, explodem
+const BOLINHA = 34 // raio da bolinha apertada, em px
+const ESPALHA = 0.95 // o quanto se espalham: 1 = até as bordas da tela (alguns passam e somem)
+const FUNDO_TOM_MAX = 4 // espalhados, usam só os tons mais apagados (0 a este)
+
 // Cores: tons de "grade" (do fundo para a frente) e o lima
 const TOM_FUNDO = '#151A1A' // atrás da esfera, quase sumindo
 const TOM_FRENTE = '#39413F' // na frente, ainda discreto (o texto continua legível)
@@ -50,10 +71,10 @@ const LIMA = '#C6F432'
 const NIVEIS_TOM = 8 // degraus de profundidade
 const NIVEIS_LIMA = 7 // degraus do acender
 
-/** Liga a esfera. Precisa de um <canvas class="abertura__esfera"> dentro da .abertura. */
+/** Liga a esfera. Precisa de um <canvas class="esfera"> e da seção .abertura. */
 export function iniciarEsfera() {
-  const canvas = document.querySelector('.abertura__esfera')
-  const secao = canvas && canvas.closest('.abertura')
+  const canvas = document.querySelector('canvas.esfera')
+  const secao = document.querySelector('.abertura')
   if (!canvas || !secao || !canvas.getContext) return
 
   const parada = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -61,11 +82,9 @@ export function iniciarEsfera() {
   const ctx = canvas.getContext('2d')
 
   // ---------- Estado ----------
-  let largura = 0 // tamanho do canvas, em px
+  let largura = 0 // tamanho da tela (o canvas é fixo e cobre a tela)
   let altura = 0
-  let cx = 0 // centro e raio da esfera, em px dentro do canvas
-  let cy = 0
-  let raio = 0
+  let raio = 0 // raio da esfera, em px
   let escala = 1 // escala do site (base.css: 80% no computador), para os caracteres acompanharem
   let dpr = 1
   let celular = false
@@ -74,48 +93,38 @@ export function iniciarEsfera() {
   let angulo = 0
   let viraX = 0 // o quanto a esfera está virada na direção do cursor (suavizado)
   let viraY = 0
-  let cursor = null // { x, y } em px dentro do canvas, ou null
+  let cursor = null // { x, y } na tela, ou null
+  let foco = null // onde os caracteres se juntam (segue o cursor, suavizado)
   let toqueAte = 0 // até quando vale o último toque (celular)
   let rodando = false
-  let visivel = true
   let ultimo = 0
   let relogio = 0 // tempo da animação em segundos (só anda enquanto roda)
+  let sujo = true // algo mudou e precisa redesenhar
+  let ultimaExplosao = -1
 
   // ---------- Tamanho do canvas (e do atlas) ----------
-  // A esfera é posicionada pela abertura, mas o canvas pode passar dela:
-  // sobe por trás do menu (até o topo da página) e desce sobre o espaço
-  // dos prints, o quanto a esfera precisar. A parte de baixo esmaece (CSS).
   function medir() {
-    const caixa = secao.getBoundingClientRect()
-    const alturaSecao = caixa.height
-    largura = caixa.width
+    largura = document.documentElement.clientWidth // sem a barra de rolagem
+    altura = window.innerHeight
     const eraCelular = celular
     celular = largura < 768 || semMouse
     escala = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1
 
     const conf = celular ? ESFERA_CELULAR : ESFERA
-    raio = Math.min(largura, alturaSecao * 1.6) * conf.raio
-    const centroNaSecao = alturaSecao * conf.centroY
-    const folga = raio * 1.06 + LETRA * 2 // a perspectiva aumenta um pouco a borda
-    const acima = Math.max(0, Math.min(caixa.top + window.scrollY, folga - centroNaSecao))
-    const abaixo = Math.max(0, centroNaSecao + folga - alturaSecao)
-    altura = acima + alturaSecao + abaixo
-    cx = largura / 2
-    cy = acima + centroNaSecao
-    canvas.style.top = `${-acima}px`
-    canvas.style.height = `${altura}px`
-    // o esmaecer começa um pouco antes do fim da abertura e vai até o pé do canvas
-    canvas.style.setProperty('--esfera-esmaece', `${((acima + alturaSecao * 0.85) / altura) * 100}%`)
+    raio = Math.min(largura, secao.offsetHeight * 1.6) * conf.raio
 
     dpr = Math.min(window.devicePixelRatio || 1, celular ? 1.5 : 2)
     canvas.width = Math.round(largura * dpr)
     canvas.height = Math.round(altura * dpr)
     if (!pontos.length || eraCelular !== celular) pontos = criarPontos(celular ? PONTOS_CELULAR : PONTOS)
     atlas = montarAtlas(dpr)
+    sujo = true
     if (parada || !rodando) desenhar(0)
   }
 
-  // ---------- Os pontos: espalhados por igual na esfera (espiral de Fibonacci) ----------
+  // ---------- Os pontos ----------
+  // Na esfera: espalhados por igual (espiral de Fibonacci).
+  // Cada um também sorteia seu lugar na bolinha e seu destino na explosão.
   function criarPontos(total) {
     const lista = []
     const ouro = Math.PI * (3 - Math.sqrt(5))
@@ -123,10 +132,19 @@ export function iniciarEsfera() {
       const y = 1 - (i / (total - 1)) * 2
       const r = Math.sqrt(1 - y * y)
       const a = ouro * i
+      const bolaA = Math.random() * Math.PI * 2
+      const bolaR = Math.sqrt(Math.random())
+      const fugaA = Math.random() * Math.PI * 2
+      const fugaR = 0.08 + Math.sqrt(Math.random()) // mais longe = mais rápido, como numa explosão
       lista.push({
         x: Math.cos(a) * r,
         y,
         z: Math.sin(a) * r,
+        bolaX: Math.cos(bolaA) * bolaR, // lugar na bolinha (disco de raio 1)
+        bolaY: Math.sin(bolaA) * bolaR,
+        fugaX: Math.cos(fugaA) * fugaR, // destino da explosão, a partir do meio da tela
+        fugaY: Math.sin(fugaA) * fugaR,
+        tom: Math.floor(Math.random() * (FUNDO_TOM_MAX + 1)), // cor depois de espalhado
         simbolo: Math.floor(Math.random() * CARACTERES.length),
         brilho: 0, // 0 = apagado; 1 = lima forte
       })
@@ -141,8 +159,8 @@ export function iniciarEsfera() {
     ...degraus(TOM_FRENTE, LIMA, NIVEIS_LIMA + 1).slice(1),
   ]
 
-  function montarAtlas(escala) {
-    const lado = Math.ceil(CELULA * escala)
+  function montarAtlas(ampliacao) {
+    const lado = Math.ceil(CELULA * ampliacao)
     const folha = document.createElement('canvas')
     folha.width = lado * CARACTERES.length
     folha.height = lado * cores.length
@@ -158,9 +176,31 @@ export function iniciarEsfera() {
   }
 
   // ---------- Um quadro ----------
+  // Devolve true se algum caractere ainda está aceso (para saber se precisa redesenhar)
   function desenhar(dt) {
+    const conf = celular ? ESFERA_CELULAR : ESFERA
+    const caixa = secao.getBoundingClientRect() // a esfera acompanha a abertura na tela
+    const cx = largura / 2
+    const cy = caixa.top + caixa.height * conf.centroY
     const letra = (celular ? LETRA_CELULAR : LETRA) * escala
     const alcance = (celular ? ALCANCE_CELULAR : ALCANCE) * escala
+    const e = parada ? 0 : esfera.explosao
+
+    // Onde os caracteres se juntam: no cursor; sem cursor, no meio do título
+    const alvoFoco = cursor && !semMouse ? cursor : { x: cx, y: altura * 0.45 }
+    if (!foco) foco = { ...alvoFoco }
+    const segue = 1 - Math.exp(-dt * 6)
+    foco.x += (alvoFoco.x - foco.x) * segue
+    foco.y += (alvoFoco.y - foco.y) * segue
+
+    // As três fases do big bang (cada uma de 0 a 1)
+    const junta = suavizar(Math.min(1, e / JUNTA)) // esfera → bolinha
+    const estoura = e <= ESTOURA ? 0 : saidaRapida((e - ESTOURA) / (1 - ESTOURA)) // bolinha → espalhados
+    const naBolinha = e > JUNTA && e < ESTOURA
+    // a bolinha pulsa um pouco enquanto está apertada
+    const pulso = naBolinha ? 1 + 0.12 * Math.sin(relogio * 22) : 1
+    const bolinha = BOLINHA * escala * pulso
+    const calorBigBang = e < ESTOURA ? junta : 1 - estoura // acende ao juntar, apaga ao espalhar
 
     // De onde vem a luz: o cursor, o último toque ou o passeio sozinho (celular)
     let luz = cursor
@@ -185,26 +225,39 @@ export function iniciarEsfera() {
     const ci = Math.cos(inclina)
     const si = Math.sin(inclina)
     const { folha, lado } = atlas
+    let aceso = false
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.clearRect(0, 0, largura, altura)
 
     for (const p of pontos) {
-      // gira em volta do eixo vertical e depois inclina para a frente
+      // 1. Onde o ponto está na esfera: gira em volta do eixo vertical e inclina para a frente
       const x1 = p.x * cg + p.z * sg
       const z1 = -p.x * sg + p.z * cg
       const y2 = p.y * ci - z1 * si
       const z2 = p.y * si + z1 * ci // -1 = atrás, 1 = na frente
-
       const perto = PERSPECTIVA / (PERSPECTIVA - z2)
       let sx = cx + x1 * raio * perto
       let sy = cy + y2 * raio * perto
+
+      // 2. Big bang: da esfera para a bolinha, e da bolinha para o destino espalhado
+      const bx = foco.x + p.bolaX * bolinha
+      const by = foco.y + p.bolaY * bolinha
+      if (estoura > 0) {
+        const fx = largura / 2 + p.fugaX * (largura / 2) * ESPALHA * 1.15
+        const fy = altura / 2 + p.fugaY * (altura / 2) * ESPALHA * 1.15
+        sx = bx + (fx - bx) * estoura
+        sy = by + (fy - by) * estoura
+      } else if (junta > 0) {
+        sx += (bx - sx) * junta
+        sy += (by - sy) * junta
+      }
       if (sx < -20 || sx > largura + 20 || sy < -20 || sy > altura + 20) continue
 
-      // Luz: acende quem está perto dela (só a metade da frente) e vai apagando devagar
+      // 3. Luz do cursor: acende quem está perto (na esfera, só a metade da frente)
       if (!parada) {
         let alvo = 0
-        if (luz && z2 > -0.1) {
+        if (luz && (e > 0 || z2 > -0.1)) {
           const d = Math.hypot(sx - luz.x, sy - luz.y)
           if (d < alcance) {
             const t = 1 - d / alcance
@@ -214,24 +267,33 @@ export function iniciarEsfera() {
         p.brilho = Math.max(alvo, p.brilho - APAGA * dt)
       }
 
-      const b = p.brilho
+      // 4. Cor e tamanho
+      const b = Math.max(p.brilho, calorBigBang)
       let cor
       if (b > 0.06) {
+        aceso = aceso || p.brilho > 0.01
         cor = NIVEIS_TOM + Math.min(NIVEIS_LIMA - 1, Math.floor(b * NIVEIS_LIMA))
         // agitado: treme e troca de símbolo
         sx += (Math.random() - 0.5) * TREME * 2 * b
         sy += (Math.random() - 0.5) * TREME * 2 * b
         if (Math.random() < TROCA * b) p.simbolo = Math.floor(Math.random() * CARACTERES.length)
+      } else if (e >= ESTOURA) {
+        cor = p.tom // espalhado: tom apagado, de fundo
       } else {
-        cor = Math.min(NIVEIS_TOM - 1, Math.floor(((z2 + 1) / 2) * NIVEIS_TOM))
+        cor = Math.min(NIVEIS_TOM - 1, Math.floor(((z2 + 1) / 2) * NIVEIS_TOM)) // profundidade na esfera
       }
 
-      const tam = (letra / 0.72) * perto * (1 + b * 0.25) // tamanho do quadradinho na tela
+      // apertados na bolinha, ficam menores; espalhados, voltam ao normal
+      const encolhe = e < ESTOURA ? 1 - junta * 0.45 : 0.55 + 0.45 * estoura
+      const profundidade = e < ESTOURA ? perto + (1 - perto) * junta : 1
+      const tam = (letra / 0.72) * profundidade * encolhe * (1 + p.brilho * 0.25)
       ctx.drawImage(folha, p.simbolo * lado, cor * lado, lado, lado, sx - tam / 2, sy - tam / 2, tam, tam)
     }
+    return aceso
   }
 
   // ---------- O laço da animação ----------
+  let aceso = false
   function quadro(agora) {
     if (!rodando) return
     requestAnimationFrame(quadro)
@@ -240,12 +302,19 @@ export function iniciarEsfera() {
     const dt = Math.min((agora - ultimo) / 1000, 0.1) // se travar, não dá um salto
     ultimo = agora
     relogio += dt
-    angulo += GIRO * dt
-    desenhar(dt)
+
+    // Depois da explosão, os caracteres ficam parados: só redesenha se algo mudou
+    const e = esfera.explosao
+    const parado = e >= 0.999 && ultimaExplosao >= 0.999 && !sujo && !aceso
+    ultimaExplosao = e
+    if (parado) return
+    if (e < 0.999) angulo += GIRO * dt // a esfera só gira enquanto existe
+    sujo = false
+    aceso = desenhar(dt)
   }
 
   function ligar() {
-    if (rodando || parada || !visivel || document.hidden) return
+    if (rodando || parada || document.hidden) return
     rodando = true
     ultimo = performance.now()
     requestAnimationFrame(quadro)
@@ -260,47 +329,59 @@ export function iniciarEsfera() {
   const fonte = document.fonts ? document.fonts.load('400 16px "JetBrains Mono"').catch(() => {}) : Promise.resolve()
   fonte.then(() => {
     medir()
-    new ResizeObserver(() => medir()).observe(secao)
+    window.addEventListener('resize', medir)
 
     if (parada) {
-      canvas.classList.add('abertura__esfera--ativa', 'abertura__esfera--pronta')
+      // Movimento reduzido: esfera parada, redesenhada só quando a página rola
+      // (o canvas é fixo, então a esfera precisa acompanhar a abertura)
+      canvas.classList.add('esfera--ativa')
+      let pedido = 0
+      window.addEventListener(
+        'scroll',
+        () => {
+          cancelAnimationFrame(pedido)
+          pedido = requestAnimationFrame(() => desenhar(0))
+        },
+        { passive: true },
+      )
       return
     }
 
-    // Pausa quando a esfera sai da tela ou a aba fica escondida
-    new IntersectionObserver(([item]) => {
-      visivel = item.isIntersecting
-      visivel ? ligar() : desligar()
-    }).observe(canvas)
+    // Pausa com a aba escondida
     document.addEventListener('visibilitychange', () => (document.hidden ? desligar() : ligar()))
+    // Rolar a página muda a posição da esfera: precisa redesenhar
+    window.addEventListener('scroll', () => (sujo = true), { passive: true })
 
-    // Cursor (computador) e toque (celular). Ouve a janela toda, porque a
-    // esfera passa da abertura (o menu e o espaço dos prints também contam).
+    // Cursor (computador) e toque (celular)
     window.addEventListener('pointermove', (e) => {
-      if (e.pointerType === 'mouse' || e.pointerType === 'pen') cursor = posicao(e)
+      if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return
+      cursor = { x: e.clientX, y: e.clientY }
+      sujo = true
     })
     document.documentElement.addEventListener('pointerleave', () => {
       cursor = null // o mouse saiu da janela
+      sujo = true
     })
     window.addEventListener('pointerdown', (e) => {
       if (e.pointerType !== 'touch') return
-      cursor = posicao(e)
+      cursor = { x: e.clientX, y: e.clientY }
       toqueAte = performance.now() + TOQUE_DURA
+      sujo = true
     })
 
     // Aparece junto com a abertura (depois do corte da tela de carregamento)
-    introCortou().then(() => {
-      canvas.classList.add('abertura__esfera--ativa')
-      // depois do esmaecer de entrada, tira a transição (a rolagem controla a opacidade)
-      setTimeout(() => canvas.classList.add('abertura__esfera--pronta'), 1300)
-    })
+    introCortou().then(() => canvas.classList.add('esfera--ativa'))
     ligar()
   })
+}
 
-  function posicao(e) {
-    const caixa = canvas.getBoundingClientRect()
-    return { x: e.clientX - caixa.left, y: e.clientY - caixa.top }
-  }
+// Curvas: começa e termina devagar / sai rápido e freia no fim (como uma explosão)
+function suavizar(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+}
+
+function saidaRapida(t) {
+  return t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)
 }
 
 // Cores intermediárias entre duas cores hex, em "total" degraus (inclui as duas pontas)

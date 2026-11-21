@@ -2,7 +2,7 @@
 // Rolagem com profundidade
 // No computador, a cena (abertura + prints) fica presa na tela
 // enquanto a pessoa rola: o título encolhe e sobe, o resto da
-// abertura some, a esfera recua e os prints vêm de longe, por
+// abertura some, a esfera faz o big bang e os prints vêm de longe, por
 // trás do título, como se estivessem se aproximando. Depois a
 // página volta a rolar normal.
 // No celular: sem prender a tela, os prints só crescem um pouco
@@ -17,6 +17,7 @@
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { introCortou } from './loader.js'
+import { esfera } from './ascii-sphere.js'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -34,7 +35,7 @@ export function iniciarProfundidade() {
   const cena = document.querySelector('.cena')
   if (!cena) return
   const titulo = cena.querySelector('.abertura h1')
-  const resto = cena.querySelectorAll('.abertura > :not(h1):not(.abertura__esfera)') // pílula, rótulo, subtítulo, botões
+  const resto = cena.querySelectorAll('.abertura > :not(h1)') // pílula, rótulo, subtítulo, botões
   const palco = cena.querySelector('.profundidade')
   const [principal, esquerda, direita] = palco.querySelectorAll('.print')
   const topo = document.querySelector('.topo') // o menu, acima da cena
@@ -94,8 +95,9 @@ export function iniciarProfundidade() {
       0,
     )
 
-    // 3. A esfera recua (a variável --recuo é lida pelo CSS da esfera)
-    linha.to(cena, { '--recuo': 1, duration: 0.8 }, 0)
+    // 3. Big bang: a esfera se junta no ponteiro e explode pela tela.
+    //    O GSAP anima o número esfera.explosao (0 → 1); o ascii-sphere.js desenha.
+    linha.to(esfera, { explosao: 1, duration: 1 }, 0)
 
     // 4. Os prints chegam de longe, por trás do título
     linha.fromTo(
@@ -116,6 +118,13 @@ export function iniciarProfundidade() {
 
   // ---------- Celular e tablet ----------
   telas.add('(max-width: 63.99rem) and (prefers-reduced-motion: no-preference)', () => {
+    // Big bang no celular: acontece enquanto a abertura sobe e sai da tela
+    gsap.to(esfera, {
+      explosao: 1,
+      ease: 'none',
+      scrollTrigger: { trigger: cena, start: 0, end: () => window.innerHeight * 0.9, scrub: SUAVE },
+    })
+
     gsap.fromTo(
       palco,
       { scale: 0.86, y: 60, autoAlpha: 0.4 },

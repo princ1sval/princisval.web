@@ -115,16 +115,43 @@ main > section:last-child {
 
 /* ---------- 1. Abertura ---------- */
 
-/* A cena (abertura + prints) é a "pilha" de camadas, de trás para a frente:
-   esfera (0) → prints (1) → texto da abertura (2). Assim os prints
-   cobrem a esfera, mas ficam atrás do título. */
+/* Esfera de caracteres (ascii-sphere.js): canvas fixo que cobre a tela,
+   atrás de TUDO (z-index -1: abaixo até do conteúdo comum das seções,
+   acima só da grade do fundo). As seções de fundo liso a cobrem; as de
+   grade (abertura, incluso, contato) deixam ver.
+   pointer-events: none deixa os cliques passarem.
+   Começa invisível e aparece junto com a abertura. */
+.esfera {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.esfera--ativa {
+  opacity: 1;
+}
+
+/* O menu fica por cima da cena */
+.topo {
+  position: relative;
+  z-index: 1;
+}
+
+/* A cena (abertura + prints) empilha: prints (1) → texto da abertura (2).
+   Assim os prints ficam atrás do título. */
 .cena {
   position: relative;
   isolation: isolate;
 }
 
 .abertura {
-  position: relative; /* referência para a esfera ao fundo */
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start; /* no celular, tudo alinhado à esquerda */
@@ -132,45 +159,8 @@ main > section:last-child {
   padding-top: var(--espaco-8);
 }
 
-/* Esfera de caracteres: atrás do texto da abertura. O ascii-sphere.js
-   ajusta top e height para ela passar da seção (sobe por trás do menu e
-   desce sobre o espaço dos prints). Embaixo ela esmaece em vez de cortar.
-   pointer-events: none deixa os cliques passarem para os botões.
-   Começa invisível e aparece junto com a abertura. */
-.abertura__esfera {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 1.2s ease;
-  -webkit-mask-image: linear-gradient(to bottom, #000 var(--esfera-esmaece, 85%), transparent);
-  mask-image: linear-gradient(to bottom, #000 var(--esfera-esmaece, 85%), transparent);
-}
-
-/* O menu fica por cima da esfera, que sobe por trás dele */
-.topo {
-  position: relative;
-  z-index: 1;
-}
-
-/* --recuo vai de 0 a 1 durante a rolagem com profundidade (depth-scroll.js):
-   a esfera vai sumindo enquanto os prints chegam */
-.abertura__esfera--ativa {
-  opacity: calc(1 - var(--recuo, 0) * 0.8);
-}
-
-/* Depois de aparecer, sem transição: assim a esfera acompanha a rolagem na hora */
-.abertura__esfera--pronta {
-  transition: none;
-}
-
-/* O texto da abertura fica na frente da esfera e dos prints */
-.abertura > :not(.abertura__esfera) {
+/* O texto da abertura fica na frente dos prints */
+.abertura > * {
   position: relative;
   z-index: 2;
 }
@@ -213,7 +203,7 @@ main > section:last-child {
    composição inteira encolhe junto com a tela. */
 .profundidade {
   position: relative;
-  z-index: 1; /* na frente da esfera, atrás do texto da abertura */
+  z-index: 1; /* atrás do texto da abertura */
   width: min(62.5rem, 100% - 2 * var(--margem-lateral)); /* até 1000 px */
   aspect-ratio: 4 / 3;
   margin: var(--espaco-8) auto;

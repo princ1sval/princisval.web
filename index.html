@@ -668,6 +668,11 @@
       })();
     </script>
 
+    <!-- Esfera de caracteres (src/js/ascii-sphere.js): canvas fixo atrás da página
+         inteira. No topo é a esfera; ao rolar, ela explode e os caracteres ficam
+         espalhados como fundo do resto do site. Só enfeite: aria-hidden. -->
+    <canvas class="esfera" aria-hidden="true"></canvas>
+
     <!-- ================= CABEÇALHO ================= -->
     <header class="topo">
       <a class="logo" href="#inicio" aria-label="Princípio Web, voltar ao início">
@@ -696,8 +701,6 @@
            ="ultimo": entra por último (os botões do WhatsApp).
            O título não entra subindo: ele acende letra por letra (src/js/hero.js). -->
       <section class="abertura" id="inicio" aria-labelledby="abertura-titulo">
-        <!-- Esfera de caracteres ao fundo (src/js/ascii-sphere.js). Só enfeite: aria-hidden. -->
-        <canvas class="abertura__esfera" aria-hidden="true"></canvas>
         <p class="pilula mono" data-intro-entrada><span aria-hidden="true">●</span> agenda aberta</p>
         <p class="rotulo mono" data-intro-entrada><span aria-hidden="true">// </span>sites e landing pages</p>
         <h1 id="abertura-titulo">Seu trabalho merece um endereço <span class="destaque">à altura.</span></h1>
