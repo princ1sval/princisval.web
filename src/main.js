@@ -18,4 +18,4 @@ import './styles/sections.css' // tela de carregamento e página "em breve"
 // ---------- Efeito ----------
 import { iniciarLoader } from './js/loader.js'
 
-iniciarLoader({ infinito: true })
+iniciarLoader()
