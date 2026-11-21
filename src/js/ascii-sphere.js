@@ -12,8 +12,8 @@
 //   0 → JUNTA: saem da esfera e se juntam no ponteiro do mouse
 //   JUNTA → ESTOURA: viram uma bolinha apertada que pulsa, em lima
 //   ESTOURA → 1: explodem e se espalham pela tela, apagando
-// Em 1, ficam espalhados como um fundo discreto do resto do site
-// (as seções de fundo liso cobrem; as de grade deixam ver).
+// Em 1, ficam espalhados como um fundo discreto do site inteiro. Os cards
+// cobrem o fundo; com o mouse em cima de um, a luz contorna a borda dele.
 // Rolou para cima, tudo volta.
 //
 // Cuidados de desempenho:
@@ -64,6 +64,14 @@ const BOLINHA = 34 // raio da bolinha apertada, em px
 const ESPALHA = 0.95 // o quanto se espalham: 1 = até as bordas da tela (alguns passam e somem)
 const FUNDO_TOM_MAX = 4 // espalhados, usam só os tons mais apagados (0 a este)
 
+// A luz na borda dos cards: com o mouse em cima de um card (que esconde os
+// caracteres do fundo), a luz contorna a borda dele, perto do ponteiro
+const CARDS = '.card, .projeto__print, .print' // o que conta como card
+const BORDA_AFASTA = 10 // px da borda até os caracteres (por fora do card)
+const BORDA_PASSO = 15 // px entre um caractere e o próximo, ao longo da borda
+const BORDA_ALCANCE = 240 // até quantos px do ponteiro a borda acende
+const BORDA_ACENDE = 6 // velocidade com que a borda acende/apaga (por segundo)
+
 // Cores: tons de "grade" (do fundo para a frente) e o lima
 const TOM_FUNDO = '#151A1A' // atrás da esfera, quase sumindo
 const TOM_FRENTE = '#39413F' // na frente, ainda discreto (o texto continua legível)
@@ -101,6 +109,10 @@ export function iniciarEsfera() {
   let relogio = 0 // tempo da animação em segundos (só anda enquanto roda)
   let sujo = true // algo mudou e precisa redesenhar
   let ultimaExplosao = -1
+  let cardSobMouse = null // o card em que o mouse está (ou null)
+  let cardBorda = null // o card cuja borda está acesa (continua um pouco depois que o mouse sai)
+  let bordaLuz = 0 // 0 = borda apagada; 1 = acesa
+  let luzAtual = null // onde está o ponteiro (ou o último toque), para a borda
 
   // ---------- Tamanho do canvas (e do atlas) ----------
   function medir() {
@@ -203,6 +215,7 @@ export function iniciarEsfera() {
     const calorBigBang = e < ESTOURA ? junta : 1 - estoura // acende ao juntar, apaga ao espalhar
 
     // De onde vem a luz: o cursor, o último toque ou o passeio sozinho (celular)
+    luzAtual = cursor
     let luz = cursor
     if (semMouse && !parada && performance.now() > toqueAte) {
       luz = {
@@ -289,7 +302,53 @@ export function iniciarEsfera() {
       const tam = (letra / 0.72) * profundidade * encolhe * (1 + p.brilho * 0.25)
       ctx.drawImage(folha, p.simbolo * lado, cor * lado, lado, lado, sx - tam / 2, sy - tam / 2, tam, tam)
     }
+
+    // 5. A luz na borda do card em que o mouse está
+    if (!parada && desenharBorda(dt, letra, folha, lado)) aceso = true
     return aceso
+  }
+
+  // Caracteres em volta da borda do card, acesos perto do ponteiro.
+  // Ficam BORDA_AFASTA px por fora, onde o card não cobre.
+  // Devolve true enquanto a borda ainda está acesa.
+  function desenharBorda(dt, letra, folha, lado) {
+    if (cardSobMouse) cardBorda = cardSobMouse
+    const alvo = cardSobMouse && luzAtual ? 1 : 0
+    bordaLuz += (alvo - bordaLuz) * (1 - Math.exp(-dt * BORDA_ACENDE))
+    if (!cardBorda || !luzAtual || bordaLuz < 0.02) {
+      if (bordaLuz < 0.02) cardBorda = null
+      return false
+    }
+
+    const caixa = cardBorda.getBoundingClientRect()
+    const afasta = BORDA_AFASTA * escala
+    const raioCanto = (parseFloat(getComputedStyle(cardBorda).borderTopLeftRadius) || 0) + afasta
+    const contorno = contornoArredondado(
+      caixa.left - afasta,
+      caixa.top - afasta,
+      caixa.width + afasta * 2,
+      caixa.height + afasta * 2,
+      raioCanto,
+    )
+    const passo = BORDA_PASSO * escala
+    const alcance = BORDA_ALCANCE * escala
+    const tam = (letra / 0.72) * 0.9
+
+    for (let s = 0, i = 0; s < contorno.total; s += passo, i++) {
+      const [x, y] = contorno.ponto(s)
+      const d = Math.hypot(x - luzAtual.x, y - luzAtual.y)
+      if (d > alcance) continue
+      const t = 1 - d / alcance
+      const forca = t * t * (3 - 2 * t) * bordaLuz
+      if (forca < 0.05) continue
+      const cor = NIVEIS_TOM + Math.min(NIVEIS_LIMA - 1, Math.floor(forca * NIVEIS_LIMA))
+      // símbolo fixo por posição, que às vezes troca (como os acesos do fundo)
+      const simbolo = Math.random() < TROCA * forca ? Math.floor(Math.random() * CARACTERES.length) : (i * 7) % CARACTERES.length
+      const tx = x + (Math.random() - 0.5) * TREME * forca
+      const ty = y + (Math.random() - 0.5) * TREME * forca
+      ctx.drawImage(folha, simbolo * lado, cor * lado, lado, lado, tx - tam / 2, ty - tam / 2, tam, tam)
+    }
+    return true
   }
 
   // ---------- O laço da animação ----------
@@ -356,15 +415,18 @@ export function iniciarEsfera() {
     window.addEventListener('pointermove', (e) => {
       if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return
       cursor = { x: e.clientX, y: e.clientY }
+      cardSobMouse = e.target.closest ? e.target.closest(CARDS) : null
       sujo = true
     })
     document.documentElement.addEventListener('pointerleave', () => {
       cursor = null // o mouse saiu da janela
+      cardSobMouse = null
       sujo = true
     })
     window.addEventListener('pointerdown', (e) => {
       if (e.pointerType !== 'touch') return
       cursor = { x: e.clientX, y: e.clientY }
+      cardSobMouse = e.target.closest ? e.target.closest(CARDS) : null
       toqueAte = performance.now() + TOQUE_DURA
       sujo = true
     })
@@ -373,6 +435,39 @@ export function iniciarEsfera() {
     introCortou().then(() => canvas.classList.add('esfera--ativa'))
     ligar()
   })
+}
+
+// O contorno de um retângulo de cantos arredondados (x, y, largura, altura, raio
+// do canto). Devolve o comprimento total e ponto(s): a posição depois de andar
+// s px pelo contorno, começando no topo, logo depois do canto de cima à esquerda.
+function contornoArredondado(x, y, l, a, r) {
+  r = Math.max(0, Math.min(r, l / 2, a / 2))
+  const retoH = l - 2 * r // trecho reto de cima e de baixo
+  const retoV = a - 2 * r // trecho reto dos lados
+  const arco = (Math.PI / 2) * r // um quarto de círculo
+  // cada trecho: comprimento e como achar o ponto dentro dele (u = 0 a 1)
+  const trechos = [
+    [retoH, (u) => [x + r + u * retoH, y]], // cima
+    [arco, (u) => canto(x + l - r, y + r, -Math.PI / 2 + u * (Math.PI / 2))], // canto de cima à direita
+    [retoV, (u) => [x + l, y + r + u * retoV]], // direita
+    [arco, (u) => canto(x + l - r, y + a - r, u * (Math.PI / 2))], // canto de baixo à direita
+    [retoH, (u) => [x + l - r - u * retoH, y + a]], // baixo
+    [arco, (u) => canto(x + r, y + a - r, Math.PI / 2 + u * (Math.PI / 2))], // canto de baixo à esquerda
+    [retoV, (u) => [x, y + a - r - u * retoV]], // esquerda
+    [arco, (u) => canto(x + r, y + r, Math.PI + u * (Math.PI / 2))], // canto de cima à esquerda
+  ]
+  const total = trechos.reduce((soma, [c]) => soma + c, 0)
+  function canto(cx, cy, angulo) {
+    return [cx + Math.cos(angulo) * r, cy + Math.sin(angulo) * r]
+  }
+  function ponto(s) {
+    for (const [comprimento, achar] of trechos) {
+      if (s <= comprimento) return achar(comprimento ? s / comprimento : 0)
+      s -= comprimento
+    }
+    return trechos[0][1](0)
+  }
+  return { total, ponto }
 }
 
 // Curvas: começa e termina devagar / sai rápido e freia no fim (como uma explosão)

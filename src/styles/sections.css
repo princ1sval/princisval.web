@@ -20,18 +20,12 @@ main section,
   padding-inline: var(--recuo-lateral);
 }
 
+/* Todas as seções são transparentes: a grade e os caracteres da esfera
+   (espalhados depois do big bang) aparecem no site inteiro. Os cards têm
+   fundo próprio, então nada aparece dentro deles. */
 main section {
   padding-block: var(--espaco-8);
   border-bottom: 1px solid var(--cor-grade);
-  /* Carbono liso cobre a grade do fundo */
-  background-color: var(--cor-carbono);
-}
-
-/* Estas deixam a grade aparecer, como no esboço */
-.abertura,
-.incluso,
-.contato {
-  background-color: transparent;
 }
 
 main > section:last-child {

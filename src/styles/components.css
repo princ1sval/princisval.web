@@ -131,6 +131,7 @@
   padding: clamp(var(--espaco-5), 3vw, var(--espaco-6));
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-card);
+  background-color: var(--cor-carbono); /* cobre os caracteres do fundo */
 }
 
 .card__numero {
