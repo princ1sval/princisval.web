@@ -24,6 +24,16 @@ html {
   text-size-adjust: 100%;
 }
 
+/* Escala do site no computador: 90% deixa tudo igual ao zoom de 90% do
+   navegador. Funciona porque textos, espaços e larguras estão em rem
+   (1rem = o font-size daqui). No celular fica 100%, para o texto e os
+   botões não ficarem pequenos demais. Para mudar a escala, mude só aqui. */
+@media (min-width: 64rem) {
+  html {
+    font-size: 90%;
+  }
+}
+
 /* Imagens e afins não passam da largura do espaço onde estão */
 img,
 picture,

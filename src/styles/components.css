@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--espaco-2);
-  min-height: 52px;
+  min-height: max(3.25rem, var(--alvo-toque)); /* 52 px, nunca menos que o alvo de toque */
   padding: 0 var(--espaco-5);
   border: 1px solid var(--cor-lima);
   border-radius: var(--raio-botao);
@@ -205,7 +205,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 360px;
+  height: 22.5rem; /* 360 px */
   padding: var(--espaco-4);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-print);
@@ -336,8 +336,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: 3.5rem; /* 56 px */
+  height: 3.5rem;
   border-radius: var(--raio-pilula);
   background-color: var(--cor-lima);
   color: var(--cor-carbono); /* o ícone usa currentColor, então pega esta cor */

@@ -66,6 +66,7 @@ export function iniciarEsfera() {
   let cx = 0 // centro e raio da esfera, em px dentro do canvas
   let cy = 0
   let raio = 0
+  let escala = 1 // escala do site (base.css: 90% no computador), para os caracteres acompanharem
   let dpr = 1
   let celular = false
   let pontos = []
@@ -90,6 +91,7 @@ export function iniciarEsfera() {
     largura = caixa.width
     const eraCelular = celular
     celular = largura < 768 || semMouse
+    escala = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1
 
     const conf = celular ? ESFERA_CELULAR : ESFERA
     raio = Math.min(largura, alturaSecao * 1.6) * conf.raio
@@ -157,8 +159,8 @@ export function iniciarEsfera() {
 
   // ---------- Um quadro ----------
   function desenhar(dt) {
-    const letra = celular ? LETRA_CELULAR : LETRA
-    const alcance = celular ? ALCANCE_CELULAR : ALCANCE
+    const letra = (celular ? LETRA_CELULAR : LETRA) * escala
+    const alcance = (celular ? ALCANCE_CELULAR : ALCANCE) * escala
 
     // De onde vem a luz: o cursor, o último toque ou o passeio sozinho (celular)
     let luz = cursor

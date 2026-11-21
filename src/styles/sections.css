@@ -154,7 +154,7 @@ main > section:last-child {
 }
 
 .abertura h1 {
-  max-width: 980px;
+  max-width: 61.25rem; /* 980 px */
 }
 
 .abertura__subtitulo {
@@ -191,7 +191,7 @@ main > section:last-child {
    composição inteira encolhe junto com a tela. */
 .profundidade {
   position: relative;
-  width: min(1000px, 100% - 2 * var(--margem-lateral));
+  width: min(62.5rem, 100% - 2 * var(--margem-lateral)); /* até 1000 px */
   aspect-ratio: 4 / 3;
   margin: var(--espaco-8) auto;
 }
@@ -277,30 +277,30 @@ main > section:last-child {
 }
 
 .projeto {
-  flex: 0 0 290px;
+  flex: 0 0 18.125rem; /* 290 px */
   scroll-snap-align: start;
 }
 
-/* No desktop, larguras diferentes como no esboço */
+/* No desktop, larguras diferentes como no esboço (280 / 620 / 520 / 300 px) */
 @media (min-width: 64rem) {
   .projeto:nth-child(1) {
-    flex-basis: 280px;
+    flex-basis: 17.5rem;
   }
 
   .projeto:nth-child(2) {
-    flex-basis: 620px;
+    flex-basis: 38.75rem;
   }
 
   .projeto:nth-child(3) {
-    flex-basis: 520px;
+    flex-basis: 32.5rem;
   }
 
   .projeto:nth-child(4) {
-    flex-basis: 300px;
+    flex-basis: 18.75rem;
   }
 
   .projeto__print {
-    height: 380px;
+    height: 23.75rem; /* 380 px */
   }
 }
 
