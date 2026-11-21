@@ -24,6 +24,15 @@ html {
   text-size-adjust: 100%;
 }
 
+/* Escala no computador: 80%, igual ao site completo (deixa tudo do tamanho
+   do zoom de 80% do navegador). Funciona porque as medidas estão em rem
+   (1rem = o font-size daqui). No celular fica 100%. */
+@media (min-width: 64rem) {
+  html {
+    font-size: 80%;
+  }
+}
+
 /* Imagens e afins não passam da largura do espaço onde estão */
 img,
 picture,

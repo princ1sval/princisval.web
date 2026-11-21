@@ -88,7 +88,7 @@ main > section:last-child {
    Ajustes no topo, iguais aos da tela de carregamento do site completo. */
 .intro__palco {
   --intro-luz: rgb(242 242 239 / 0.035);           /* brilho da célula a cada batida */
-  --intro-tam: clamp(64px, 12vw, 140px);           /* tamanho dos símbolos */
+  --intro-tam: clamp(4rem, 12vw, 8.75rem);         /* tamanho dos símbolos (64 → 140 px) */
   --intro-tam-nome: calc(var(--intro-tam) * 0.33); /* tamanho do "princípio.web" */
   --intro-fechado: 0.35em; /* quanto o < e o /> se aproximam para formar o </> */
 
