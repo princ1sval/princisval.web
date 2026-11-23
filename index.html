@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Tela de carregamento: decide antes do primeiro quadro se ela roda.
-         Só na primeira visita (marca no localStorage), nunca para quem pediu
+         Roda em toda visita e toda recarga da página, nunca para quem pediu
          menos movimento, e só em navegador com Web Animations.
-         ?intro na URL força de novo; ?intro=0.25 ou ?intro=0.1 roda em câmera lenta. -->
+         ?intro=0.25 ou ?intro=0.1 na URL roda em câmera lenta. -->
     <script>
       (function () {
         var raiz = document.documentElement;
@@ -20,13 +20,6 @@
         if (pedido) {
           var velocidade = parseFloat(pedido[1]);
           if (velocidade > 0 && velocidade < 1) raiz.style.setProperty('--intro-velocidade', velocidade);
-        } else {
-          try {
-            if (localStorage.getItem('principio-intro')) return;
-            localStorage.setItem('principio-intro', '1');
-          } catch (erro) {
-            // armazenamento bloqueado: não dá para saber se é a primeira visita, então roda
-          }
         }
         raiz.classList.add('com-intro');
 
@@ -54,7 +47,7 @@
          logo acima, já embutida, para estar pronta no primeiro quadro.
          ========================================================= */
 
-      /* Sem html.com-intro (segunda visita, movimento reduzido ou sem JS) a camada não aparece */
+      /* Sem html.com-intro (movimento reduzido, navegador antigo ou sem JS) a camada não aparece */
       .intro {
         display: none;
       }
@@ -323,7 +316,7 @@
         var ocupado = false;
 
         if (raiz.classList.contains('com-intro')) rodar(original);
-        else original.remove(); // segunda visita ou movimento reduzido: a camada nem fica no DOM
+        else original.remove(); // movimento reduzido ou navegador antigo: a camada nem fica no DOM
 
         function rever(velocidade) {
           if (ocupado) return; // ainda rodando
@@ -825,7 +818,7 @@
           <li class="passo">
             <span class="passo__numero mono" aria-hidden="true">02</span>
             <h3>Proposta</h3>
-            <p>Escopo, prazo de [PRAZO] e valor de [SEU PREÇO].</p>
+            <p>Escopo, prazo de até 30 dias e valor de [SEU PREÇO].</p>
           </li>
           <li class="passo">
             <span class="passo__numero mono" aria-hidden="true">03</span>
@@ -855,7 +848,7 @@
           </details>
           <details>
             <summary>Quanto tempo leva?</summary>
-            <p>[PRAZO]</p>
+            <p>Até 30 dias.</p>
           </details>
           <details>
             <summary>Quanto custa?</summary>

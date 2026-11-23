@@ -8,7 +8,7 @@
 
 /**
  * Promessa que se cumpre quando a tela de carregamento termina e a
- * abertura já entrou. Se a tela não rodou (segunda visita ou movimento
+ * abertura já entrou. Se a tela não rodou (navegador antigo ou movimento
  * reduzido), se cumpre na hora.
  *
  * Uso: introTerminou().then(() => iniciarHero())
