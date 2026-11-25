@@ -1,0 +1,32 @@
+<!doctype html>
+<!-- Com este arquivo, a Cloudflare responde "404" para endereços que não existem,
+     em vez de repetir a página inicial (o que confunde o Google). -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Página não encontrada: Princípio Web</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      body {
+        display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+        gap: 24px; min-height: 100vh; margin: 0; padding: 24px max(24px, 8vw); box-sizing: border-box;
+        color: #F2F2EF; font-family: system-ui, sans-serif;
+        background: linear-gradient(#1A1F1F 1px, transparent 1px) 0 0 / 72px 72px,
+          linear-gradient(90deg, #1A1F1F 1px, transparent 1px) 0 0 / 72px 72px, #0E1111;
+      }
+      p { margin: 0; color: #9AA19E; font-family: ui-monospace, Consolas, monospace; }
+      h1 { margin: 0; font-size: clamp(2.2rem, 6vw, 4rem); line-height: 1.1; letter-spacing: -0.03em; }
+      span { color: #C6F432; }
+      a { padding: 16px 24px; border-radius: 14px; background: #C6F432; color: #0E1111; font-weight: 600; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <main style="display: contents">
+      <p>// erro 404</p>
+      <h1>Esta página <span>não existe.</span></h1>
+      <a href="/">Ir para o início →</a>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+# Todos os buscadores podem ler o site inteiro.
+# CSS, JS e imagens ficam liberados: o Google precisa deles para ver a página.
+User-agent: *
+Allow: /
+
+Sitemap: https://princisval.com.br/sitemap.xml
