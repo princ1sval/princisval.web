@@ -70,6 +70,13 @@ export function iniciarPortfolio() {
   anterior.addEventListener('click', () => irPara(Math.max(0, atual - 1)))
   proximo.addEventListener('click', () => irPara(Math.min(total - 1, atual + 1)))
 
+  // Teclado: ao chegar com Tab no link de um card, a faixa vai até ele
+  lista.addEventListener('focusin', (e) => {
+    if (!e.target.matches(':focus-visible')) return
+    const i = cards.indexOf(e.target.closest('.projeto'))
+    if (i >= 0) irPara(i)
+  })
+
   const telas = gsap.matchMedia()
 
   // ---------- Entrada (todas as telas, menos movimento reduzido) ----------

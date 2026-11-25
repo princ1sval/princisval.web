@@ -712,15 +712,15 @@
       <div class="profundidade" aria-hidden="true">
         <div class="print print--principal">
           <div class="print__barra mono">princisval.com.br</div>
-          <p class="print__tela mono">[PRINT DESTE SITE]</p>
+          <img class="print__img" src="/src/assets/img/projetos/principio-web.webp" width="1280" height="800" alt="" decoding="async" />
         </div>
         <div class="print">
           <div class="print__barra"></div>
-          <p class="print__tela mono">[PRINT PROJETO 1]</p>
+          <img class="print__img" src="/src/assets/img/projetos/cec-informa.webp" width="1080" height="660" alt="" decoding="async" />
         </div>
         <div class="print">
           <div class="print__barra"></div>
-          <p class="print__tela mono">[PRINT PROJETO 2]</p>
+          <img class="print__img" src="/src/assets/img/projetos/escola-tecnica.webp" width="1200" height="900" alt="" decoding="async" />
         </div>
       </div>
       </div>
@@ -740,26 +740,29 @@
           </div>
         </div>
 
+        <!-- <picture>: no celular entra o print tirado no celular, que cabe no card em pé -->
         <ol class="portfolio__lista" role="list">
           <li class="projeto">
-            <div class="projeto__print mono">[PRINT CELULAR]</div>
+            <div class="projeto__print"><img src="/src/assets/img/projetos/principio-web-celular.webp" width="624" height="824" alt="Abertura deste site no celular" loading="lazy" decoding="async" /></div>
             <p class="projeto__info mono"><span aria-hidden="true">01 · </span>princisval.com.br</p>
             <h3 class="projeto__nome">Este site</h3>
           </li>
           <li class="projeto">
-            <div class="projeto__print mono">[PRINT PROJETO 1]</div>
-            <p class="projeto__info mono"><span aria-hidden="true">02 · </span>psicologia</p>
-            <h3 class="projeto__nome">[PROJETO 1]</h3>
+            <a class="projeto__print" href="https://fcv.apprbs.com.br/cecinforma" target="_blank" rel="noopener" aria-label="Abrir CEC Informa em outra aba"><picture><source media="(max-width: 63.99rem)" srcset="/src/assets/img/projetos/cec-informa-celular.webp" /><img src="/src/assets/img/projetos/cec-informa.webp" width="1080" height="660" alt="Topo do jornal CEC Informa, com o índice da edição" loading="lazy" decoding="async" /></picture></a>
+            <p class="projeto__info mono"><span aria-hidden="true">02 · </span>jornal digital</p>
+            <h3 class="projeto__nome">CEC Informa</h3>
           </li>
           <li class="projeto">
-            <div class="projeto__print mono">[PRINT PROJETO 2]</div>
-            <p class="projeto__info mono"><span aria-hidden="true">03 · </span>advocacia</p>
-            <h3 class="projeto__nome">[PROJETO 2]</h3>
+            <a class="projeto__print" href="https://fcv.apprbs.com.br/escola-tecnica" target="_blank" rel="noopener" aria-label="Abrir Escola Técnica FCV em outra aba"><picture><source media="(max-width: 63.99rem)" srcset="/src/assets/img/projetos/escola-tecnica-celular.webp" /><img src="/src/assets/img/projetos/escola-tecnica.webp" width="1200" height="900" alt="Abertura da página do curso Técnico em Enfermagem" loading="lazy" decoding="async" /></picture></a>
+            <p class="projeto__info mono"><span aria-hidden="true">03 · </span>educação</p>
+            <h3 class="projeto__nome">Escola Técnica FCV</h3>
           </li>
+          <!-- Ainda sem link: o site tem textos pendentes de aprovação. Quando for
+               publicado, trocar o <div> por <a href="..."> e tirar o "em construção". -->
           <li class="projeto">
-            <div class="projeto__print mono">[PRINT PROJETO 3]</div>
-            <p class="projeto__info mono"><span aria-hidden="true">04 · </span>[ÁREA]</p>
-            <h3 class="projeto__nome">[PROJETO 3]</h3>
+            <div class="projeto__print"><img src="/src/assets/img/projetos/maria-luiza.webp" width="624" height="800" alt="Tela de abertura do site, com o nome Maria Luiza e um beija-flor" loading="lazy" decoding="async" /></div>
+            <p class="projeto__info mono"><span aria-hidden="true">04 · </span>psicologia · em construção</p>
+            <h3 class="projeto__nome">Maria Luiza, psicóloga</h3>
           </li>
         </ol>
       </section>
@@ -800,7 +803,8 @@
           <li><span class="lista-numerada__numero mono" aria-hidden="true">02</span> Funciona bem no celular, onde seu cliente te procura</li>
           <li><span class="lista-numerada__numero mono" aria-hidden="true">03</span> Botão direto para o WhatsApp</li>
           <li><span class="lista-numerada__numero mono" aria-hidden="true">04</span> Seus clientes te acham no Google</li>
-          <li><span class="lista-numerada__numero mono" aria-hidden="true">05</span> [DOMÍNIO, HOSPEDAGEM E AJUSTES: CONFIRMAR]</li>
+          <li><span class="lista-numerada__numero mono" aria-hidden="true">05</span> Domínio e hospedagem inclusos por 1 ano</li>
+          <li><span class="lista-numerada__numero mono" aria-hidden="true">06</span> Ajustes simples sem custo</li>
         </ol>
       </section>
 
@@ -818,7 +822,7 @@
           <li class="passo">
             <span class="passo__numero mono" aria-hidden="true">02</span>
             <h3>Proposta</h3>
-            <p>Escopo, prazo de até 30 dias e valor de [SEU PREÇO].</p>
+            <p>Escopo, prazo de até 30 dias e valor a partir de R$&nbsp;350.</p>
           </li>
           <li class="passo">
             <span class="passo__numero mono" aria-hidden="true">03</span>
@@ -852,11 +856,11 @@
           </details>
           <details>
             <summary>Quanto custa?</summary>
-            <p>[SEU PREÇO]</p>
+            <p>A partir de R$&nbsp;350. O valor final depende do que o seu site precisa, e você recebe a proposta antes de começar. Domínio e hospedagem estão inclusos por 1 ano.</p>
           </details>
           <details>
             <summary>Posso mudar o site depois?</summary>
-            <p>[AJUSTES: CONFIRMAR]</p>
+            <p>Sim. Ajustes simples não têm custo. Mudanças mais complexas têm um valor à parte, combinado antes.</p>
           </details>
         </div>
       </section>
