@@ -169,6 +169,11 @@ main > section:last-child {
   font-size: var(--texto-grande);
 }
 
+/* inline-block: a segunda frase desce inteira, sem partir no meio */
+.abertura__subtitulo span {
+  display: inline-block;
+}
+
 /* No celular, botões um embaixo do outro, na largura toda */
 .abertura__botoes {
   display: flex;
