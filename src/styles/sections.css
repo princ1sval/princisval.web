@@ -94,7 +94,7 @@ main > section:last-child {
 .nav .botao {
   min-height: var(--alvo-toque);
   padding-inline: var(--espaco-4);
-  font-size: 0.875rem;
+  font-size: var(--texto-nav);
 }
 
 @media (min-width: 48rem) {

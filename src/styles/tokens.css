@@ -34,6 +34,7 @@
   --texto-medio: 1.125rem;                       /* 18 px, itens de lista e perguntas */
   --texto-base: 1rem;                            /* 16 px */
   --texto-mono: 0.8125rem;                       /* 13 px, // comentários */
+  --texto-nav: 0.875rem;                         /* 14 px, botão "Fale comigo" do topo */
 
   /* ---------- Espaçamentos ---------- */
   --espaco-1: 0.25rem;  /*   4 px */
@@ -77,4 +78,18 @@
      o maior entre a margem mínima e "metade do que sobra da tela".
      Usar só em elementos que ocupam a largura toda da tela. */
   --recuo-lateral: max(var(--margem-lateral), (100% - var(--largura-max)) / 2);
+}
+
+/* No computador o site fica em 80% (base.css), o que deixava os textos
+   pequenos demais (12,8 px no texto comum, 10,4 px nos detalhes).
+   Aqui só os textos sobem; títulos, espaços e larguras seguem em 80%.
+   Valores em px já contam a escala de 80%. */
+@media (min-width: 64rem) {
+  :root {
+    --texto-grande: clamp(1rem, 1.5vw, 1.375rem); /* até 17,6 px, subtítulos */
+    --texto-medio: 1.3125rem;                     /* 16,8 px, itens de lista e perguntas */
+    --texto-base: 1.1875rem;                      /* 15,2 px */
+    --texto-mono: 1rem;                           /* 12,8 px, // comentários */
+    --texto-nav: 1.0625rem;                       /* 13,6 px */
+  }
 }
